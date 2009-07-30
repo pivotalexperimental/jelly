@@ -75,25 +75,3 @@ Jelly.Page.prototype.attach = function(component, args) {
   });
   Jelly.Page.components.push([component, args]);
 };
-
-(function($) {
-  $.ajaxWithJsonCallback = function(params) {
-    $.ajax($.ajaxWithJsonCallback.params(params));
-  };
-
-  $.ajaxWithJsonCallback.params = function(otherParams) {
-    if(!otherParams) {
-      otherParams = {};
-    }
-    return $.extend({
-      dataType: 'json',
-      cache: false,
-      success : $.ajaxWithJsonCallback.onSuccess
-    }, otherParams);
-  };
-
-  $.ajaxWithJsonCallback.onSuccess = function(json) {
-    page[json.method].apply(page, json.arguments);
-    return true;
-  };
-})(jQuery);
