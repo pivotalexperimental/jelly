@@ -9,7 +9,7 @@ describe "JellyHelper" do
       helper.should_receive(:form_authenticity_token).and_return('areallysecuretoken')
       output = helper.init_specific_javascript
       output.should include('<script type="text/javascript">')
-      output.should include("Pages.activatePage('MyFunController', 'super_good_action');")
+      output.should include("Jelly.activatePage('MyFunController', 'super_good_action');")
     end
   end
 

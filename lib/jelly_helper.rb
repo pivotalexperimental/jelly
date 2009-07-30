@@ -11,7 +11,7 @@ module JellyHelper
   def init_specific_javascript
     javascript_tag <<-JS
       window._token = '#{form_authenticity_token}'
-      Pages.activatePage('#{controller.controller_path.camelcase}', '#{controller.action_name}');
+      Jelly.activatePage('#{controller.controller_path.camelcase}', '#{controller.action_name}');
       #{@content_for_javascript}
     JS
   end
