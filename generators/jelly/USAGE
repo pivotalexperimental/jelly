@@ -1,0 +1,11 @@
+Description:
+    Creates 'jelly.js' and dependent jQuery libraries
+
+Example:
+    ./script/generate jelly
+
+    This will create:
+        public/javascripts/jelly.js
+        public/javascripts/jquery-1.3.2.js
+        public/javascripts/jquery.protify-0.3.js
+

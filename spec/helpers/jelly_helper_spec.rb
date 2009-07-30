@@ -1,0 +1,30 @@
+require File.dirname(__FILE__) + '/../spec_helper.rb'
+
+describe "JsweetHelper" do
+
+  describe "#init_specific_javascript" do
+    it "should create a javascript include tag to initialize the Page object" do
+      stub_controller = mock(Object, :controller_path => 'my_fun_controller', :action_name => 'super_good_action')
+      helper.should_receive(:controller).any_number_of_times.and_return(stub_controller)
+      helper.init_specific_javascript.should include('<script type="text/javascript">')
+      helper.init_specific_javascript.should include("Pages.activatePage('MyFunController', 'super_good_action');")
+    end
+  end
+
+  describe "#page_specific_javascript_files" do
+    it "returns the javascript files in the given path" do
+      files = helper.page_specific_javascript_files(File.join(File.dirname(__FILE__), '/../fixtures'))
+      files.should_not be_empty
+      files.should =~ ['pages/lions', 'pages/tigers', 'pages/bears']
+    end
+  end
+
+  describe "#attach_javascript_component" do
+    it "adds a call to page.attach in the javascript content" do
+      helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
+      expected_args = ['arg1','arg2','arg3'].to_json
+      assigns[:content_for_javascript].should include("page.attach(MyComponent, #{expected_args}")
+    end
+  end
+
+end
