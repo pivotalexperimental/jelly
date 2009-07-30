@@ -1,13 +1,15 @@
 require File.dirname(__FILE__) + '/../spec_helper.rb'
 
-describe "JsweetHelper" do
+describe "JellyHelper" do
 
   describe "#init_specific_javascript" do
     it "should create a javascript include tag to initialize the Page object" do
       stub_controller = mock(Object, :controller_path => 'my_fun_controller', :action_name => 'super_good_action')
       helper.should_receive(:controller).any_number_of_times.and_return(stub_controller)
-      helper.init_specific_javascript.should include('<script type="text/javascript">')
-      helper.init_specific_javascript.should include("Pages.activatePage('MyFunController', 'super_good_action');")
+      helper.should_receive(:form_authenticity_token).and_return('areallysecuretoken')
+      output = helper.init_specific_javascript
+      output.should include('<script type="text/javascript">')
+      output.should include("Pages.activatePage('MyFunController', 'super_good_action');")
     end
   end
 

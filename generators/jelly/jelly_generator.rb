@@ -1,4 +1,4 @@
-class JsweetGenerator < Rails::Generator::NamedBase
+class JellyGenerator < Rails::Generator::NamedBase
   def manifest
     record do |m|
       m.file 'jelly.js', "public/javascripts/jelly.js"

@@ -1,7 +1,7 @@
 ActionController::Base.class_eval do
-  include JsweetController
+  include JellyController
 end
 
 ActionView::Base.class_eval do
-  include JsweetHelper
+  include JellyHelper
 end
