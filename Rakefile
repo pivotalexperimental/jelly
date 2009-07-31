@@ -21,3 +21,19 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('README')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+begin
+  require 'jeweler'
+  Jeweler::Tasks.new do |gemspec|
+    gemspec.name = "jelly"
+    gemspec.summary = "a sweet unobtrusive javascript framework for jQuery and Rails"
+    gemspec.description = "Jelly provides a set of tools and conventions for creating rich ajax/javascript\
+web applications with jQuery and Ruby on Rails."
+    gemspec.email = "opensource@pivotallabs.com"
+    gemspec.homepage = "http://github.com/pivotal/jelly"
+    gemspec.description = "TODO"
+    gemspec.authors = ["Pivotal Labs, Inc"]
+  end
+rescue LoadError
+  puts "Jeweler not available. Install it with: sudo gem install jeweler"
+end
