@@ -7,7 +7,7 @@ describe "JellyHelper" do
       stub_controller = mock(Object, :controller_path => 'my_fun_controller', :action_name => 'super_good_action')
       helper.should_receive(:controller).any_number_of_times.and_return(stub_controller)
       helper.should_receive(:form_authenticity_token).and_return('areallysecuretoken')
-      output = helper.init_specific_javascript
+      output = helper.spread_jelly
       output.should include('<script type="text/javascript">')
       output.should include("Jelly.activatePage('MyFunController', 'super_good_action');")
     end

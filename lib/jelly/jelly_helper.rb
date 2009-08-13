@@ -6,16 +6,18 @@ module JellyHelper
     end
   end
 
-  def init_specific_javascript
-    javascript_tag <<-JS
+  def spread_jelly
+    pages = javascript_include_tag(*page_specific_javascript_files)
+    activate = javascript_tag <<-JS
       window._token = '#{form_authenticity_token}'
       Jelly.activatePage('#{controller.controller_path.camelcase}', '#{controller.action_name}');
       #{@content_for_javascript}
     JS
+    pages + "\n" + activate
   end
 
   def attach_javascript_component(component_name, *args)
-    content_for(:javascript, "page.attach(#{component_name}, #{args.to_json});")
+    content_for(:javascript, "page.attach(#{component_name}, #{args.to_json});\n")
   end
 
 end
