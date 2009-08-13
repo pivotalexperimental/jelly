@@ -4,7 +4,7 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{jelly}
+  s.name = %q{honkster-jelly}
   s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
@@ -27,8 +27,8 @@ Gem::Specification.new do |s|
      "generators/jelly/templates/javascripts/jelly.js",
      "generators/jelly/templates/javascripts/jquery/jquery-1.3.2.js",
      "generators/jelly/templates/javascripts/jquery/jquery.protify-0.3.js",
+     "honkster-jelly.gemspec",
      "install.rb",
-     "jelly.gemspec",
      "lib/jelly.rb",
      "lib/jelly/jelly_controller.rb",
      "lib/jelly/jelly_helper.rb",

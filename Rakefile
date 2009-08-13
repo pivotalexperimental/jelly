@@ -25,7 +25,7 @@ end
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
-    gemspec.name = "jelly"
+    gemspec.name = "honkster-jelly"
     gemspec.summary = "a sweet unobtrusive javascript framework for jQuery and Rails"
     gemspec.description = "Jelly provides a set of tools and conventions for creating rich ajax/javascript web applications with jQuery and Ruby on Rails."
     gemspec.email = "opensource@pivotallabs.com"

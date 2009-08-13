@@ -15,9 +15,10 @@ describe "JellyHelper" do
 
   describe "#page_specific_javascript_files" do
     it "returns the javascript files in the given path" do
-      files = helper.page_specific_javascript_files(File.join(File.dirname(__FILE__), '/../fixtures'))
+      my_rails_root = File.join(File.dirname(__FILE__), '/../fixtures')
+      files = helper.page_specific_javascript_files("foo", my_rails_root)
       files.should_not be_empty
-      files.should =~ ['pages/lions', 'pages/tigers', 'pages/bears']
+      files.should =~ ['foo/pages/lions', 'foo/pages/tigers', 'foo/pages/bears']
     end
   end
 

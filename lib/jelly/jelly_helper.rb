@@ -1,10 +1,8 @@
 module JellyHelper
 
-  JELLY_FILES_PATH = "#{RAILS_ROOT}/public/javascripts"
-
-  def page_specific_javascript_files(jelly_files_path = JELLY_FILES_PATH)
-    Dir["#{jelly_files_path}/pages/**/*.js"].map do |path|
-      path.gsub("#{jelly_files_path}/", "").gsub(/\.js$/, "")
+  def page_specific_javascript_files(jelly_files_path_from_javascripts = '', rails_root = RAILS_ROOT)
+    Dir["#{rails_root}/public/javascripts/#{jelly_files_path_from_javascripts}/pages/**/*.js"].map do |path|
+      path.gsub("#{rails_root}/public/javascripts/", "").gsub(/\.js$/, "")
     end
   end
 
