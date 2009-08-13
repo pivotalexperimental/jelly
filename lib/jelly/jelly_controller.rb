@@ -1,11 +1,11 @@
 module JellyController
   protected
 
-  def update_page(callback_base_name = @action_name, options = {}, &block)
-    render :inline => update_page_erb("on_#{callback_base_name}", options, block)
+  def jelly_callback(callback_base_name = @action_name, options = {}, &block)
+    render :inline => jelly_callback_erb("on_#{callback_base_name}", options, block)
   end
 
-  def update_page_erb(callback_name, options, block)
+  def jelly_callback_erb(callback_name, options, block)
     @callback_name = callback_name
     @options = options
     @block = block
