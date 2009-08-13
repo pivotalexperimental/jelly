@@ -1,12 +1,24 @@
 Jelly
 =====
 
+INSTALLATION
+------------
+
+If you haven't already, add GitHub to your gem sources:
+
+    gem sources -a http://gems.github.com
+
+Then run:
+
+    sudo gem install pivotal-jelly
+
+
 GETTING STARTED
 ---------------
 
 In your `environment.rb` in the `Rails::Initializer.run` block, be sure to require jelly:
 
-    config.gem "pivotal-jelly"
+    config.gem "jelly"
 
 Then install the required JavaScript files by running this command in your Rails project:
 
