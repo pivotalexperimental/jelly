@@ -6,15 +6,17 @@ var page = Jelly.all["MyPage"];
 var My = {};
 My.Class = {on_my_method: function() {console.debug("foo bar")}};
 
-describe("ajax_with_json_callback", function(){
+describe("ajax_with_jelly", function(){
   describe("Initializer", function(){
+    var our_token = "authenticity token";
+
     beforeEach(function(){
       spyOn($, 'ajax');
-    });
-    it("should set up params and call ajax", function(){
-      var our_token = "authenticity token";
       window._token = our_token;
-      $.ajaxWithJelly({foo : 'bar', data: {bar : 'baz'}});
+    });
+
+    it("should set up params and call ajax", function(){
+      $.ajaxWithJelly({foo : 'bar', type: 'POST', data: {bar : 'baz'}});
       expect($.ajax).wasCalled();
       var ajaxParams = ($.ajax).mostRecentCall.args[0];
       expect(ajaxParams['dataType']).toEqual('json');
@@ -24,7 +26,21 @@ describe("ajax_with_json_callback", function(){
       expect(ajaxParams['data']['authenticity_token']).toEqual(our_token);
       expect(ajaxParams['data']['bar']).toEqual('baz');
     });
-    
+
+    it("should not send an auth token when type is GET", function() {
+      $.ajaxWithJelly({ data : {foo : 'bar'}, type: "GET" });
+      expect($.ajax).wasCalled();
+      var ajaxParams = ($.ajax).mostRecentCall.args[0];
+      expect(ajaxParams['data']['authenticity_token']).toEqual(null);
+    });
+
+    it("should not send an auth token when type is null (jQuery defaults to GET)", function() {
+      $.ajaxWithJelly({ data : {foo : 'bar'} });
+      expect($.ajax).wasCalled();
+      var ajaxParams = ($.ajax).mostRecentCall.args[0];
+      expect(ajaxParams['data']['authenticity_token']).toEqual(null);
+    });
+
     it("should allow override of type", function(){
       $.ajaxWithJelly({type : 'DELETE'});
       expect($.ajax).wasCalled();

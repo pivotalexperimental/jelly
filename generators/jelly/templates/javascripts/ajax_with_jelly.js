@@ -5,9 +5,12 @@
 
   $.ajaxWithJelly.params = function(otherParams) {
     otherParams = otherParams || {};
-    otherParams['data'] = $.extend(otherParams['data'], {
-      authenticity_token: window._token
-    });
+
+    if (otherParams.type && otherParams.type != "GET") {
+      otherParams['data'] = $.extend(otherParams['data'], {
+        authenticity_token: window._token
+      });      
+    }
     return $.extend({
       dataType: 'json',
       cache: false,
