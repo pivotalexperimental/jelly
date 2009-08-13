@@ -11,7 +11,6 @@
     return $.extend({
       dataType: 'json',
       cache: false,
-      type: 'POST',
       success : $.ajaxWithJelly.onSuccess
     }, otherParams);
   };

@@ -23,7 +23,6 @@ describe("ajax_with_json_callback", function(){
       expect(ajaxParams['foo']).toEqual('bar');
       expect(ajaxParams['data']['authenticity_token']).toEqual(our_token);
       expect(ajaxParams['data']['bar']).toEqual('baz');
-      expect(ajaxParams['type']).toEqual('POST');
     });
     
     it("should allow override of type", function(){
