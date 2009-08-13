@@ -7,10 +7,6 @@ var My = {};
 My.Class = {on_my_method: function() {console.debug("foo bar")}};
 
 describe("ajax_with_json_callback", function(){
-  beforeEach(function(){
-    new Mom();
-  });
-
   describe("Initializer", function(){
     beforeEach(function(){
       spyOn($, 'ajax');
