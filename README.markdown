@@ -26,7 +26,7 @@ Then install the required JavaScript files by running this command in your Rails
 
 Then, in your layout, add the following:
 
-    <%= javascript_include_tag :jelly %>
+    <%= javascript_include_tag :jelly, *application_jelly_files %>
     <%= spread_jelly %>
 
 This will include the required JavaScripts for jelly and activate the current page.  The `:jelly` javascript expansion
