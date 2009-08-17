@@ -23,11 +23,27 @@ describe "JellyHelper" do
   end
 
   describe "#attach_javascript_component" do
+
+    after do
+      #need to clear this since it's saving state between tests
+      assigns[:content_for_javascript] = ""
+      helper.clear_jelly_attached()
+    end
+
+    it "fails to add multiple calls to page.attach for the same component" do
+      helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
+      helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
+      helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg5')
+      assigns[:content_for_javascript].should == 'page.attach(MyComponent, ["arg1","arg2","arg3"]);page.attach(MyComponent, ["arg1","arg2","arg5"]);'
+    end
+
     it "adds a call to page.attach in the javascript content" do
+      helper.clear_jelly_attached()
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       expected_args = ['arg1','arg2','arg3'].to_json
-      assigns[:content_for_javascript].should include("page.attach(MyComponent, #{expected_args}")
+      assigns[:content_for_javascript].should == "page.attach(MyComponent, #{expected_args});"
     end
+
   end
 
 end
