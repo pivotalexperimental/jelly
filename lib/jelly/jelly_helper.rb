@@ -23,8 +23,8 @@ module JellyHelper
   def attach_javascript_component(component_name, *args)
     key = "page.attach(#{component_name}, #{args.to_json});"
     unless @@jelly_attached_components.include? key
-      content_for(:javascript, key)
       @@jelly_attached_components << key
+      content_for(:javascript, key)
     end
   end
 
