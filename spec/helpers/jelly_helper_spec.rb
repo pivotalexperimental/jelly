@@ -38,7 +38,6 @@ describe "JellyHelper" do
     end
 
     it "adds a call to page.attach in the javascript content" do
-      helper.clear_jelly_attached()
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       expected_args = ['arg1','arg2','arg3'].to_json
       assigns[:content_for_javascript].should == "page.attach(MyComponent, #{expected_args});"

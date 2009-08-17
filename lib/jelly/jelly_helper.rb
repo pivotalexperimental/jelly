@@ -14,16 +14,15 @@ module JellyHelper
     JS
   end
 
-  @@jelly_attached_components = []
-
   def clear_jelly_attached()
-    @@jelly_attached_components = []
+    @jelly_attached_components = []
   end
 
   def attach_javascript_component(component_name, *args)
+    @jelly_attached_components ||= []    
     key = "page.attach(#{component_name}, #{args.to_json});"
-    unless @@jelly_attached_components.include? key
-      @@jelly_attached_components << key
+    unless @jelly_attached_components.include? key
+      @jelly_attached_components << key
       content_for(:javascript, key)
     end
   end
