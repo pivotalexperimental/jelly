@@ -30,24 +30,45 @@ describe("Jelly", function(){
 
   describe("ajaxFormWithJelly", function(){
 
-    it("should not be defined if ajaxForm not available", function(){
-      expect($.fn.ajaxForm).toEqual(undefined);
-      expect($.fn.ajaxFormWithJelly).toEqual(undefined);
+    describe("without ajaxForm plugin", function(){
+      it("should not be defined", function(){
+        expect($.fn.ajaxForm).toEqual(undefined);
+        expect($.fn.ajaxFormWithJelly).toEqual(undefined);
+      });
     });
 
-    it("should set default params and call ajax", function(){
-      var $form = $('body').append('<form id="myForm"></form>').find('#myForm');
-      var modifiedParams = "whatever";
-      $.fn.ajaxForm = {};
-      defineAjaxWithJellyFunctions($);
-      spyOn($.fn, 'ajaxForm');
-      spyOn($.ajaxWithJelly, 'params').andReturn(modifiedParams);
-      $form.ajaxFormWithJelly();
-      expect($.ajaxWithJelly.params).wasCalled();
-      expect($.ajaxWithJelly.params).wasCalledWith();
-      expect($.fn.ajaxForm).wasCalled();
-      expect($.fn.ajaxForm).wasCalledWith(modifiedParams);
-      expect($.fn.ajaxForm.mostRecentCall.object.get(0)).toEqual($form.get(0));
+    describe("with ajaxForm plugin", function(){
+      var $form;
+      beforeEach(function(){
+        $form = $('body').append('<form id="myForm"></form>').find('#myForm');
+        $.fn.ajaxForm = {};
+        spyOn($.fn, 'ajaxForm');
+        defineAjaxWithJellyFunctions($);
+      });
+
+      afterEach(function(){
+        $.fn.ajaxForm = undefined;
+        defineAjaxWithJellyFunctions($);
+      });
+
+      it("should set default params and call ajax", function(){
+        var modifiedParams = "whatever";
+        spyOn($.ajaxWithJelly, 'params').andReturn(modifiedParams);
+        $form.ajaxFormWithJelly();
+        expect($.ajaxWithJelly.params).wasCalled();
+        expect($.ajaxWithJelly.params).wasCalledWith(undefined);
+        expect($.fn.ajaxForm).wasCalled();
+        expect($.fn.ajaxForm).wasCalledWith(modifiedParams);
+        expect($.fn.ajaxForm.mostRecentCall.object.get(0)).toEqual($form.get(0));
+      });
+
+      it("should merge in params", function(){
+        var params = {foo: "bar"};
+        spyOn($.ajaxWithJelly, 'params');
+        $form.ajaxFormWithJelly(params);
+        expect($.ajaxWithJelly.params).wasCalled();
+        expect($.ajaxWithJelly.params).wasCalledWith(params);
+      });
     });
   });
 

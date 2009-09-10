@@ -4,8 +4,8 @@
   };
 
   if ($.fn.ajaxForm) {
-    $.fn.ajaxFormWithJelly = function() {
-      this.ajaxForm($.ajaxWithJelly.params());
+    $.fn.ajaxFormWithJelly = function(params) {
+      this.ajaxForm($.ajaxWithJelly.params(params));
     };
   }
 
