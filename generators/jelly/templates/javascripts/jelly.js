@@ -25,12 +25,16 @@ Jelly.add = function(name) {
 var page;
 Jelly.activatePage = function(controllerName, actionName) {
   page = Jelly.all[controllerName] || new Jelly.Page(controllerName);
-  $(document).ready(function() {
-    Jelly.Page.all();
-    if(page.all) page.all();
-    if(page[actionName]) page[actionName].call(page);
-    page.loaded = true;
+  $(document).ready(function(){
+    Jelly.doActivatePage(actionName); 
   });
+};
+
+Jelly.doActivatePage = function(actionName){
+  if(page.all) page.all();
+  if(page[actionName]) page[actionName].call(page);
+  Jelly.Page.all();
+  page.loaded = true;
 };
 
 Jelly.Page = function(name) {
