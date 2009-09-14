@@ -26,11 +26,11 @@ var page;
 Jelly.activatePage = function(controllerName, actionName) {
   page = Jelly.all[controllerName] || new Jelly.Page(controllerName);
   $(document).ready(function(){
-    Jelly.doActivatePage(actionName); 
+    Jelly._activatePage(actionName); 
   });
 };
 
-Jelly.doActivatePage = function(actionName){
+Jelly._activatePage = function(actionName){
   if(page.all) page.all();
   if(page[actionName]) page[actionName].call(page);
   Jelly.Page.all();
