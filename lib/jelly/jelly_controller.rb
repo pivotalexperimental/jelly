@@ -9,12 +9,15 @@ module JellyController
     @callback_name = callback_name
     @options = options
     @block = block
-    <<-ERB
+    erb = <<-ERB
       <%= begin
         args = @block ? instance_eval(&@block) : []
         args = [args] unless args.is_a?(Array)
         {"method" => @callback_name, "arguments" => args}.reverse_merge(@options).to_json
       end %>
     ERB
+    request.xhr? ? erb : "<textarea>#{erb}</textarea>"
   end
+
+
 end

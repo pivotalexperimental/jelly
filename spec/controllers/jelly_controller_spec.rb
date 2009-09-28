@@ -20,6 +20,10 @@ describe ApplicationController do
     end
 
     describe "#jelly_callback_erb" do
+      before do
+        request.stub!(:xhr?).and_return(true)
+      end
+
       context "with options" do
         it "should work with a block" do
           erb = @controller.send(:jelly_callback_erb, 'foo', {'bar' => 'baz'}, lambda{'grape'})
@@ -83,6 +87,32 @@ describe ApplicationController do
           'arguments' => ['<div class="foo"></div>']
         }
       end
+
+      context "when the request is not an XHR" do
+        before do
+          request.stub!(:xhr?).and_return(false)
+        end
+
+        it "should wrap json response in a textarea tag to support File Uploads in an iframe target (see: http://malsup.com/jquery/form/#code-samples)" do
+          erb = @controller.send(:jelly_callback_erb, 'foo', {'bar' => 'baz'}, lambda{'grape'})
+          result = ERB.new(erb).result(@controller.send(:binding))
+          result.should =~ /^<textarea>/
+          result.should =~ /<\/textarea>$/
+        end
+      end
+
+      context "when the request is an XHR" do
+        before do
+          request.stub!(:xhr?).and_return(true)
+        end
+
+        it "should not do the textarea nonsense" do
+          erb = @controller.send(:jelly_callback_erb, 'foo', {'bar' => 'baz'}, lambda{'grape'})
+          ERB.new(erb).result(@controller.send(:binding)).should_not =~ /textarea/
+        end
+
+      end
+
     end
   end
 end
