@@ -1,36 +1,55 @@
 Jelly
 =====
 
-INSTALLATION
+What is Jelly?
+--------------
+Jelly is an unobtrusive Javascript framework for [jQuery](http://jquery.com) and [Rails](http://rubyonrails.org).
+It provides a set of conventions and tools that help you organize your AJAX and client-side code,
+while keeping Javascript out of your views and markup. Jelly is the glue between your Rails controllers
+and jQuery events.
+
+Jelly encourages and enables unit testing your Javascript code. Using a Javascript testing framework such as [Jasmine](http://github.com/pivotal/jasmine)
+or [Screw Unit](http://github.com/nathansobo/screw-unit), Jelly allows you to test AJAX and client-side
+events independently from your Rails app.
+
+What Jelly is NOT
+-----------------
+**Jelly is NOT a Javascript generator.** With Jelly, you're writing pure Javascript to define your AJAX browser events. Jelly simply
+provides a set of Javascript functions to make interacting with Rails easier. It's nothing like RJS.
+
+**Jelly is NOT a Javascript framework.** Jelly is designed to be used with jQuery and jQuery's event-based
+AJAX framework. Jelly also supports the popular [jQuery ajaxForm](http://malsup.com/jquery/form/) plugin.
+
+Requirements
+------------
+* Rails 2.3.x
+* jQuery 1.3.x
+
+Installation
 ------------
 
-If you haven't already, add GitHub to your gem sources:
+Jelly is now available as a gem on on [RubyForge](http://rubyforge.org/projects/pivotalrb/):
 
-    gem sources -a http://gems.github.com
+    sudo gem install jelly
 
-Then run:
-
-    sudo gem install pivotal-jelly
-
-
-GETTING STARTED
----------------
-
-In your `environment.rb` in the `Rails::Initializer.run` block, be sure to require jelly:
-
-    config.gem "jelly"
-
-Then install the required JavaScript files by running this command in your Rails project:
+Then, install the required Javascript files to your <code>public/javascripts</code> directory by running the Jelly generator:
 
     script/generate jelly
 
-Then, in your layout, add the following:
+Getting Started - "Spread Jelly"
+--------------------------------
+
+Be sure to require <code>jelly</code> when your application loads. This can be done in your `environment.rb` in the `Rails::Initializer.run` block:
+
+    config.gem "jelly"
+
+Then, in your layouts, add the following:
 
     <%= javascript_include_tag :jelly, *application_jelly_files %>
     <%= spread_jelly %>
 
 This will include the required JavaScripts for jelly and activate the current page.  The `:jelly` javascript expansion
-includes jQuery.  If you already have jQuery included in the page, use the `:only_jelly` expansion instead.
+includes jQuery. If you already have jQuery included in the page, use the `:only_jelly` expansion instead.
 
 EXAMPLE USAGE
 -------------
