@@ -36,45 +36,72 @@ Then, install the required Javascript files to your <code>public/javascripts</co
 
     script/generate jelly
 
-Getting Started - "Spread Jelly"
+Getting Started
 --------------------------------
 
 Be sure to require <code>jelly</code> when your application loads. This can be done in your `environment.rb` in the `Rails::Initializer.run` block:
 
     config.gem "jelly"
 
-Then, in your layouts, add the following:
+Then, in your layouts, add the following to the `<head>` section:
 
     <%= javascript_include_tag :jelly, *application_jelly_files %>
     <%= spread_jelly %>
 
-This will include the required JavaScripts for jelly and activate the current page.  The `:jelly` javascript expansion
-includes jQuery. If you already have jQuery included in the page, use the `:only_jelly` expansion instead.
+The `javascript_include_tag` line will include the required Javascript libraries for jelly. The `:jelly` javascript
+expansion includes the latest version of jQuery. If you already have jQuery included in the page, use the `:only_jelly`
+expansion instead
 
-EXAMPLE USAGE
+The `spread_jelly` line activates the events that you have defined on the current page.
+
+Usage
 -------------
 
-Assuming you have controller named `fun` with an action called `index` and that you have a layout called `fun.html.erb`
-that is already setup as described above.  In your fun index view (`index.html.erb`), put:
+Jelly maps page-specific Javascript functions to Rails Actions and Controllers. For example: FunController#index will
+activate the `index` function in the `Fun` Jelly object. Jelly uses jQuery's `$(document).ready()` to execute the
+page-specifc function when the page has loaded. Let's look at some code:
 
-    <h1>Your page's 'index' function did not run. Jelly is not configured correctly.</h1>
-    <span class="all">Your page's 'all' function did not run. Jelly is not configured correctly.</span>
-
-Then, in `public/javascripts/pages/fun.js`, put:
+In `public/javascripts/pages/fun.js`, I write a simple Jelly file:
 
     Jelly.add("Fun", {
-      all: function() {
-        $('span.all').text("I am displayed on every action in this controller.");
-      },
+
       index: function() {
-        $('h1').text("Welcome to the index page.");
+        $('a.clickme').click(function() {
+          alert('Hello world!');
+        });
       }
+
     });
 
-Now goto `/fun/index` and see Jelly in action!
+Jelly will automatically execute the `index` function when the Rails app runs the `FunController#index` action. Lets
+continue the example by adding more Javascript functions that map to the `new` and `show` Rails actions. We can also
+specify an `all` function, which will be executed on all actions in the `FunController`.
 
-AJAX CALLBACKS WITH JELLY
--------------------------
+    Jelly.add("Fun", {
+
+      index: function() {
+        $('a.clickme').click(function() {
+          alert('Hello world!');
+        });
+      },
+
+      'new': function() {
+        $('#mydiv').html('<span>Hello World</span>');
+      },
+
+      show : function() {},
+
+      all: function() {
+        $('#hidden_stuff').show();
+      }
+
+    });
+
+Notice the slightly different syntax for `new`. This is because `new` is a reserved word in Javascript.
+Create a separate file in `public/javascripts/pages` for each of your controllers as you use Jelly throughout your application.
+
+AJAX With Jelly
+---------------
 
 You can trigger callbacks on the page object from Rails with the `jelly_callback` method.
 Adding to the `index.html.erb` file from above:
