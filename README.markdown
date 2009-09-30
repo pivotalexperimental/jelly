@@ -154,5 +154,8 @@ either one parameter, or an array of parameters.
 DEVELOPMENT
 -----------
 
+Track Jelly's development roadmap on [Jelly's Pivotal Tracker project](http://www.pivotaltracker.com/projects/30454)
+
 To run ruby tests, run `rake spec`.
-To run JavaScript tests, open `jelly/spec/jasmine_runner.html` in a web browser.
+
+To run Javascript tests, open `jelly/spec/jasmine_runner.html` in a web browser.
