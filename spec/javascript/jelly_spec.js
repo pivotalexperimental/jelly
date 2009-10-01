@@ -7,26 +7,6 @@ describe("Jelly", function() {
     window._token = our_token;
   });
 
-  describe("Jelly.activatePage", function() {
-    it("should call the page-specific js before the jelly components", function() {
-      var thingsCalled = [];
-
-      Jelly.add("MyController", {
-        test_action: function() {
-          thingsCalled.push('page');
-        }
-      });
-
-      spyOn(Jelly.Page, 'all').andCallFake(function() {
-        thingsCalled.push('components');
-      });
-
-      Jelly.activatePage('MyController', 'test_action');
-
-      expect(thingsCalled).toEqual(['page', 'components']);
-    });
-  });
-
   describe("Jelly", function() {
     describe(".add", function() {
       afterEach(function() {
@@ -52,53 +32,55 @@ describe("Jelly", function() {
     });
 
     describe(".activatePage", function() {
-      var foobarShowInvoked, originalPagesAll;
       beforeEach(function() {
-        foobarShowInvoked = false;
-        Jelly.add("Foobar", {show: function() {
-          foobarShowInvoked = true;
-        }});
-        originalPagesAll = Jelly.Page.all;
+        Jelly.add("Foobar", {baz : function() {}, all : function() {}, show: function() {}});
+        spyOn(Jelly.all["Foobar"], "show");
       });
 
       afterEach(function() {
         delete Jelly.all["Foobar"];
-        Jelly.Page.all = originalPagesAll;
       });
 
-      it("invokes Jelly.Page.all", function() {
-        var allInvoked = false;
-        Jelly.Page.all = function() {
-          allInvoked = true;
-        };
-        Jelly.activatePage("Foobar", "show");
-        expect(allInvoked).toEqual(true);
+      it("should call the page-specific js before the jelly components", function() {
+        var thingsCalled = [];
+
+        Jelly.add("MyController", {
+          test_action: function() {
+            thingsCalled.push('page');
+          }
+        });
+
+        spyOn(Jelly.Page, 'initComponents').andCallFake(function() {
+          thingsCalled.push('components');
+        });
+
+        Jelly.activatePage('MyController', 'test_action');
+
+        expect(thingsCalled).toEqual(['page', 'components']);
       });
 
       describe("when the passed-in controllerName is defined", function() {
         describe("when the actionName is defined", function() {
           it("invokes the page-specific method", function() {
-            expect(Jelly.all["Foobar"].show).toNotEqual(undefined);
-            expect(foobarShowInvoked).toEqual(false);
+            var foobar = Jelly.all["Foobar"];
+            expect(foobar.show).wasNotCalled();
             Jelly.activatePage("Foobar", "show");
-            expect(foobarShowInvoked).toEqual(true);
+            expect(foobar.show).wasCalled();
           });
 
           describe("when the 'all' method is defined", function() {
             var invokedMethods;
             beforeEach(function() {
               invokedMethods = [];
-              Jelly.all["Foobar"].all = function() {
+              spyOn(Jelly.all["Foobar"], "all").andCallFake(function() {
                 invokedMethods.push("all");
-              };
-
-              Jelly.all["Foobar"].baz = function() {
+              });
+              spyOn(Jelly.all["Foobar"], "baz").andCallFake(function() {
                 invokedMethods.push("baz");
-              };
+              });
             });
 
             it("invokes the all method before invoking the page-specific method", function() {
-              expect(Jelly.all["Foobar"].baz).toNotEqual(undefined);
               expect(invokedMethods).toEqual([]);
               Jelly.activatePage("Foobar", "baz");
               expect(invokedMethods).toEqual(['all', 'baz']);
@@ -107,11 +89,9 @@ describe("Jelly", function() {
         });
 
         describe("when the actionName is not defined", function() {
-          it("does nothing", function() {
+          it("does not blow up", function() {
             expect(Jelly.all["Foobar"].easterBunny).toEqual(undefined);
-            expect(foobarShowInvoked).toEqual(false);
             Jelly.activatePage("Foobar", "easterBunny");
-            expect(foobarShowInvoked).toEqual(false);
           });
 
           describe("when the 'all' method is defined", function() {
@@ -134,25 +114,13 @@ describe("Jelly", function() {
       });
 
       describe("when the passed-in controllerName is not defined", function() {
-        var originalAll;
-        beforeEach(function() {
-          originalAll = Jelly.Page.prototype.all;
-        });
-
-        afterEach(function() {
-          Jelly.Page.prototype.all = originalAll;
-        });
-
-        it("invokes the global all method on an anonymous Page", function() {
-          var anonymousAllInvoked = false;
-          Jelly.Page.prototype.all = function() {
-            anonymousAllInvoked = true;
-          };
+        it("invokes all method on an anonymous Page", function() {
+          spyOn(Jelly.Page.prototype, "all");
           expect(Jelly.all["Baz"]).toEqual(undefined);
 
           Jelly.activatePage("Baz", "easterBunny");
 
-          expect(anonymousAllInvoked).toEqual(true);
+          expect(Jelly.all["Baz"].all).wasCalled();
         });
       });
     });
