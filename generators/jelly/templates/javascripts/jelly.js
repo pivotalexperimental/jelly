@@ -63,12 +63,12 @@ Jelly.Page.prototype.on_redirect = function(location){
 
 Jelly.Page.prototype.attach = function(component, args) {
   var methodNames = [];
-  // TODO: Figure out a better way to do this.
   for(var methodName in component.pageMixin) {
     methodNames.push(methodName);
   }
   var self = this;
   $.protify(methodNames).each(function(methodName) {
+    // TODO: is anybody using these before_/after_ hooks?  if not, delete them and use components as observers
     self[methodName] = function() {
       if(this['before_' + methodName]) {
         this['before_' + methodName].apply(this, arguments);

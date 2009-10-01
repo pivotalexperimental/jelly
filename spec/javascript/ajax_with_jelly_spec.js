@@ -1,12 +1,10 @@
-var My = {};
-My.Class = {on_my_method: function() {console.debug("foo bar")}};
-
-describe("Jelly", function(){
+describe("Jelly", function() {
   var our_token;
 
-  beforeEach(function(){
+  beforeEach(function() {
     Jelly.add("MyPage", {
-      on_my_method : function(){}
+      on_my_method : function() {
+      }
     });
     page = Jelly.all["MyPage"];
     spyOn($, 'ajax');
@@ -18,8 +16,8 @@ describe("Jelly", function(){
     delete Jelly.all["MyPage"];
   });
 
-  describe("ajaxWithJelly", function(){
-    it("should set default params and call ajax", function(){
+  describe("ajaxWithJelly", function() {
+    it("should set default params and call ajax", function() {
       var params = {foo: "bar"};
       var modifiedParams = "whatever";
       spyOn($.ajaxWithJelly, 'params').andReturn(modifiedParams);
@@ -31,30 +29,30 @@ describe("Jelly", function(){
     });
   });
 
-  describe("ajaxFormWithJelly", function(){
+  describe("ajaxFormWithJelly", function() {
 
-    describe("without ajaxForm plugin", function(){
-      it("should not be defined", function(){
+    describe("without ajaxForm plugin", function() {
+      it("should not be defined", function() {
         expect($.fn.ajaxForm).toEqual(undefined);
         expect($.fn.ajaxFormWithJelly).toEqual(undefined);
       });
     });
 
-    describe("with ajaxForm plugin", function(){
+    describe("with ajaxForm plugin", function() {
       var $form;
-      beforeEach(function(){
+      beforeEach(function() {
         $form = $('body').append('<form id="myForm"></form>').find('#myForm');
         $.fn.ajaxForm = {};
         spyOn($.fn, 'ajaxForm');
         Jelly.defineAjaxWithJellyFunctions($);
       });
 
-      afterEach(function(){
+      afterEach(function() {
         $.fn.ajaxForm = undefined;
         Jelly.defineAjaxWithJellyFunctions($);
       });
 
-      it("should set default params and call ajax", function(){
+      it("should set default params and call ajax", function() {
         var modifiedParams = "whatever";
         spyOn($.ajaxWithJelly, 'params').andReturn(modifiedParams);
         $form.ajaxFormWithJelly();
@@ -65,7 +63,7 @@ describe("Jelly", function(){
         expect($.fn.ajaxForm.mostRecentCall.object.get(0)).toEqual($form.get(0));
       });
 
-      it("should merge in params", function(){
+      it("should merge in params", function() {
         var params = {foo: "bar"};
         spyOn($.ajaxWithJelly, 'params');
         $form.ajaxFormWithJelly(params);
@@ -75,21 +73,21 @@ describe("Jelly", function(){
     });
   });
 
-  describe("ajaxWithJelly.params", function(){
-    it("should set some base prams", function(){
+  describe("ajaxWithJelly.params", function() {
+    it("should set some base prams", function() {
       var ajaxParams = $.ajaxWithJelly.params();
       expect(ajaxParams['dataType']).toEqual('json');
       expect(ajaxParams['cache']).toBeFalsy();
       expect(ajaxParams['success']).toEqual($.ajaxWithJelly.onSuccess);
     });
 
-    it("should preserve passed data", function(){
+    it("should preserve passed data", function() {
       var ajaxParams = $.ajaxWithJelly.params({foo : 'bar', data: {bar : 'baz'}});
       expect(ajaxParams['foo']).toEqual('bar');
       expect(ajaxParams['data']['bar']).toEqual('baz');
     });
 
-    describe("whether to set authenticity token", function(){
+    describe("whether to set authenticity token", function() {
       it("should set an auth token when type is not a GET", function() {
         var ajaxParams = $.ajaxWithJelly.params({type: "NON-GET"});
         expect(ajaxParams['data']['authenticity_token']).toEqual(our_token);
@@ -106,14 +104,14 @@ describe("Jelly", function(){
       });
     });
 
-    it("should allow override of type", function(){
+    it("should allow override of type", function() {
       var ajaxParams = $.ajaxWithJelly.params({type : 'DELETE'});
       expect(ajaxParams['type']).toEqual('DELETE');
     });
   });
 
-  describe("ajaxWithJelly.onSuccess", function(){
-    it("should call page.mymethod", function(){
+  describe("ajaxWithJelly.onSuccess", function() {
+    it("should call page.on_my_method", function() {
       spyOn(page, 'on_my_method');
       $.ajaxWithJelly.onSuccess({
         "arguments":["arg1", "arg2"],
@@ -123,15 +121,54 @@ describe("Jelly", function(){
       expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
     });
 
-    it("should call My.Class.mymethod", function(){
-      spyOn(My.Class, 'on_my_method');
-      $.ajaxWithJelly.onSuccess({
-        "arguments":["arg1", "arg2"],
-        "method":"on_my_method",
-        "on":"My.Class"
+    describe("when there are attached components", function() {
+      it("calls page.on_my_method first and then component.on_my_method", function() {
+        var component = function() {
+        };
+        component.on_my_method = function() {
+        };
+        page.attach(component);
+
+        var functionsCalledInOrder = [];
+        spyOn(page, 'on_my_method').andCallFake(function() {
+          functionsCalledInOrder.push("page");
+        });
+        spyOn(component, 'on_my_method').andCallFake(function() {
+          functionsCalledInOrder.push("component");
+        });
+        $.ajaxWithJelly.onSuccess({
+          "arguments":["arg1", "arg2"],
+          "method":"on_my_method"
+        });
+        expect(page.on_my_method).wasCalled();
+        expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
+        expect(component.on_my_method).wasCalled();
+        expect(component.on_my_method).wasCalledWith('arg1', 'arg2');
+        expect(functionsCalledInOrder).toEqual(["page", "component"]);
       });
-      expect(My.Class.on_my_method).wasCalled();
-      expect(My.Class.on_my_method).wasCalledWith('arg1', 'arg2');
+    });
+
+    describe("when the 'on' parameter is present and has on_my_method function on it", function() {
+
+      beforeEach(function() {
+        callbackObject = {};
+        callbackObject.secondObject = {on_my_method: function() { }};
+      });
+
+      afterEach(function() {
+        delete callbackObject;
+      });
+
+      it("should call on_my_method on that object", function() {
+        spyOn(callbackObject.secondObject, 'on_my_method');
+        $.ajaxWithJelly.onSuccess({
+          "arguments":["arg1", "arg2"],
+          "method":"on_my_method",
+          "on":"callbackObject.secondObject"
+        });
+        expect(callbackObject.secondObject.on_my_method).wasCalledWith('arg1', 'arg2');
+      });
     });
   });
+
 });
