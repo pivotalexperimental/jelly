@@ -28,7 +28,9 @@ if(!window.Jelly) Jelly = new Object();
 
   $.ajaxWithJelly.onSuccess = function(json) {
     var context = json.on ? eval(json.on) : page;
-    context[json.method].apply(context, json.arguments);
+    if(context[json.method]) {
+      context[json.method].apply(context, json.arguments);
+    }
     $.protify(Jelly.Page.components).each(function(componentAndArgs) {
       var component = componentAndArgs[0];
       if(component[json.method]) {

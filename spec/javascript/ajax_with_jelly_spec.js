@@ -111,45 +111,56 @@ describe("Jelly", function() {
   });
 
   describe("ajaxWithJelly.onSuccess", function() {
-    it("should call page.on_my_method", function() {
-      spyOn(page, 'on_my_method');
-      $.ajaxWithJelly.onSuccess({
-        "arguments":["arg1", "arg2"],
-        "method":"on_my_method"
-      });
-      expect(page.on_my_method).wasCalled();
-      expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
-    });
-
-    describe("when there are attached components", function() {
-      it("calls page.on_my_method first and then component.on_my_method", function() {
-        var component = function() {
-        };
-        component.on_my_method = function() {
-        };
-        page.attach(component);
-
-        var functionsCalledInOrder = [];
-        spyOn(page, 'on_my_method').andCallFake(function() {
-          functionsCalledInOrder.push("page");
-        });
-        spyOn(component, 'on_my_method').andCallFake(function() {
-          functionsCalledInOrder.push("component");
-        });
+    describe("when the callback method is defined on the page", function() {
+      it("should call the callback method on the page", function() {
+        spyOn(page, 'on_my_method');
         $.ajaxWithJelly.onSuccess({
           "arguments":["arg1", "arg2"],
           "method":"on_my_method"
         });
         expect(page.on_my_method).wasCalled();
         expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
-        expect(component.on_my_method).wasCalled();
-        expect(component.on_my_method).wasCalledWith('arg1', 'arg2');
-        expect(functionsCalledInOrder).toEqual(["page", "component"]);
+      });
+
+      describe("when there are attached components", function() {
+        it("calls the callback method on the page first and then on the component", function() {
+          var component = function() {
+          };
+          component.on_my_method = function() {
+          };
+          page.attach(component);
+
+          var functionsCalledInOrder = [];
+          spyOn(page, 'on_my_method').andCallFake(function() {
+            functionsCalledInOrder.push("page");
+          });
+          spyOn(component, 'on_my_method').andCallFake(function() {
+            functionsCalledInOrder.push("component");
+          });
+          $.ajaxWithJelly.onSuccess({
+            "arguments":["arg1", "arg2"],
+            "method":"on_my_method"
+          });
+          expect(page.on_my_method).wasCalled();
+          expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
+          expect(component.on_my_method).wasCalled();
+          expect(component.on_my_method).wasCalledWith('arg1', 'arg2');
+          expect(functionsCalledInOrder).toEqual(["page", "component"]);
+        });
       });
     });
 
-    describe("when the 'on' parameter is present and has on_my_method function on it", function() {
+    describe("when the page object does not define the callback method", function() {
+      it("does not blow up", function() {
+        expect(page.on_my_undefined_method).toBe(undefined);
+        $.ajaxWithJelly.onSuccess({
+          "arguments":["arg1", "arg2"],
+          "method":"on_my_undefined_method"
+        });
+      });
+    });
 
+    describe("when the 'on' parameter is present", function() {
       beforeEach(function() {
         callbackObject = {};
         callbackObject.secondObject = {on_my_method: function() { }};
@@ -159,14 +170,27 @@ describe("Jelly", function() {
         delete callbackObject;
       });
 
-      it("should call on_my_method on that object", function() {
-        spyOn(callbackObject.secondObject, 'on_my_method');
-        $.ajaxWithJelly.onSuccess({
-          "arguments":["arg1", "arg2"],
-          "method":"on_my_method",
-          "on":"callbackObject.secondObject"
+      describe("when the 'on' object defines the callback method", function() {
+        it("should call on_my_method on that object", function() {
+          spyOn(callbackObject.secondObject, 'on_my_method');
+          $.ajaxWithJelly.onSuccess({
+            "arguments":["arg1", "arg2"],
+            "method":"on_my_method",
+            "on":"callbackObject.secondObject"
+          });
+          expect(callbackObject.secondObject.on_my_method).wasCalledWith('arg1', 'arg2');
         });
-        expect(callbackObject.secondObject.on_my_method).wasCalledWith('arg1', 'arg2');
+      });
+
+      describe("when the 'on' object does not define the callback method", function() {
+        it("does not blow up", function() {
+          expect(callbackObject.secondObject.on_my_undefined_method).toBe(undefined);
+          $.ajaxWithJelly.onSuccess({
+            "arguments":["arg1", "arg2"],
+            "method":"on_my_undefined_method",
+            "on":"callbackObject.secondObject"
+          });
+        });
       });
     });
   });
