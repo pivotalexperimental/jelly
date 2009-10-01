@@ -11,7 +11,7 @@
  *
  */
 
-var Jelly = new Object();
+if(!window.Jelly) Jelly = new Object();
 Jelly.all = {};
 
 Jelly.add = function(name) {

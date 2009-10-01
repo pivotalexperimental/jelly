@@ -1,4 +1,6 @@
-(defineAjaxWithJellyFunctions = function($) {
+if(!window.Jelly) Jelly = new Object();
+
+(Jelly.defineAjaxWithJellyFunctions = function($) {
   $.ajaxWithJelly = function(params) {
     $.ajax($.ajaxWithJelly.params(params));
   };
