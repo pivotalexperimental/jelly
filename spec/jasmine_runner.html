@@ -42,13 +42,14 @@
   }
 </style>
 
-<body>
-
 <script type="text/javascript">
-  var jasmineEnv = jasmine.getEnv();
-  jasmineEnv.reporter = new jasmine.TrivialReporter();
-  jasmineEnv.execute();
+  $(document).ready(function() {
+    var jasmineEnv = jasmine.getEnv();
+    jasmineEnv.reporter = new jasmine.TrivialReporter();
+    jasmineEnv.execute();
+  });
 </script>
 
+<body>
 </body>
 </html>

@@ -150,7 +150,6 @@ describe("Jelly", function(){
       });
 
       Jelly.activatePage('MyController', 'test_action');
-      Jelly._activatePage('test_action');
 
       expect(thingsCalled).toEqual(['page', 'components']);
     });

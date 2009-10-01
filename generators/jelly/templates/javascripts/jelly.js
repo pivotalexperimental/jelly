@@ -26,7 +26,7 @@ var page;
 Jelly.activatePage = function(controllerName, actionName) {
   page = Jelly.all[controllerName] || new Jelly.Page(controllerName);
   $(document).ready(function(){
-    Jelly._activatePage(actionName); 
+    Jelly._activatePage(actionName);
   });
 };
 
