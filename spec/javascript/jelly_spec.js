@@ -50,7 +50,7 @@ describe("Jelly", function() {
           }
         });
 
-        spyOn(Jelly.Page, 'initComponents').andCallFake(function() {
+        spyOn(Jelly, 'initComponents').andCallFake(function() {
           thingsCalled.push('components');
         });
 

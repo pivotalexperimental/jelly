@@ -33,8 +33,16 @@ Jelly.activatePage = function(controllerName, actionName) {
 Jelly._activatePage = function(actionName){
   if(page.all) page.all();
   if(page[actionName]) page[actionName].call(page);
-  Jelly.Page.initComponents();
+  Jelly.initComponents();
   page.loaded = true;
+};
+
+Jelly.initComponents = function() {
+  $.protify(Jelly.Page.components).each(function(componentAndArgs) {
+    var component = componentAndArgs[0];
+    var args = componentAndArgs[1] || [];
+    if(component.init) component.init.apply(component, args);
+  });
 };
 
 Jelly.Page = function(name) {
@@ -42,13 +50,6 @@ Jelly.Page = function(name) {
   Jelly.all[name] = this;
 };
 
-Jelly.Page.initComponents = function() {
-  $.protify(Jelly.Page.components).each(function(componentAndArgs) {
-    var component = componentAndArgs[0];
-    var args = componentAndArgs[1] || [];
-    if(component.init) component.init.apply(component, args);
-  });
-};
 Jelly.Page.components = [];
 Jelly.Page.prototype.loaded = false;
 Jelly.Page.prototype.all = function() {
