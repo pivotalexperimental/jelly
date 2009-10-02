@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{jelly}
-  s.version = "0.5.4"
+  s.version = "0.5.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Pivotal Labs, Inc"]
-  s.date = %q{2009-09-28}
+  s.date = %q{2009-10-01}
   s.description = %q{Jelly provides a set of tools and conventions for creating rich ajax/javascript web applications with jQuery and Ruby on Rails.}
   s.email = %q{opensource@pivotallabs.com}
   s.extra_rdoc_files = [
@@ -42,24 +42,24 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.5}
   s.summary = %q{a sweet unobtrusive javascript framework for jQuery and Rails}
   s.test_files = [
-    "spec/controllers/jelly_controller_spec.rb",
-     "spec/helpers/jelly_helper_spec.rb",
-     "spec/rails_root/app/controllers/application_controller.rb",
-     "spec/rails_root/app/helpers/application_helper.rb",
-     "spec/rails_root/config/boot.rb",
-     "spec/rails_root/config/environment.rb",
-     "spec/rails_root/config/environments/development.rb",
-     "spec/rails_root/config/environments/production.rb",
-     "spec/rails_root/config/environments/test.rb",
-     "spec/rails_root/config/initializers/backtrace_silencers.rb",
-     "spec/rails_root/config/initializers/inflections.rb",
-     "spec/rails_root/config/initializers/mime_types.rb",
-     "spec/rails_root/config/initializers/new_rails_defaults.rb",
-     "spec/rails_root/config/initializers/session_store.rb",
-     "spec/rails_root/config/routes.rb",
+    "spec/helpers/jelly_helper_spec.rb",
+     "spec/controllers/jelly_controller_spec.rb",
+     "spec/spec_helper.rb",
      "spec/rails_root/test/performance/browsing_test.rb",
      "spec/rails_root/test/test_helper.rb",
-     "spec/spec_helper.rb"
+     "spec/rails_root/app/helpers/application_helper.rb",
+     "spec/rails_root/app/controllers/application_controller.rb",
+     "spec/rails_root/config/boot.rb",
+     "spec/rails_root/config/environment.rb",
+     "spec/rails_root/config/initializers/session_store.rb",
+     "spec/rails_root/config/initializers/inflections.rb",
+     "spec/rails_root/config/initializers/backtrace_silencers.rb",
+     "spec/rails_root/config/initializers/new_rails_defaults.rb",
+     "spec/rails_root/config/initializers/mime_types.rb",
+     "spec/rails_root/config/routes.rb",
+     "spec/rails_root/config/environments/production.rb",
+     "spec/rails_root/config/environments/test.rb",
+     "spec/rails_root/config/environments/development.rb"
   ]
 
   if s.respond_to? :specification_version then
