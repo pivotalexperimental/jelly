@@ -38,7 +38,7 @@ Jelly._activatePage = function(actionName){
 };
 
 Jelly.initComponents = function() {
-  $.protify(Jelly.Page.components).each(function(componentAndArgs) {
+  $.protify(page.components).each(function(componentAndArgs) {
     var component = componentAndArgs[0];
     var args = componentAndArgs[1] || [];
     if(component.init) component.init.apply(component, args);
@@ -47,10 +47,10 @@ Jelly.initComponents = function() {
 
 Jelly.Page = function(name) {
   this.name = name;
+  this.components = [];
   Jelly.all[name] = this;
 };
 
-Jelly.Page.components = [];
 Jelly.Page.prototype.loaded = false;
 Jelly.Page.prototype.all = function() {
 };
@@ -80,5 +80,5 @@ Jelly.Page.prototype.attach = function(component, args) {
       return returnValue;
     };
   });
-  Jelly.Page.components.push([component, args]);
+  page.components.push([component, args]);
 };

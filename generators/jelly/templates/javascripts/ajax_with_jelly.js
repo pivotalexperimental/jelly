@@ -31,7 +31,7 @@ if(!window.Jelly) Jelly = new Object();
     if(context[json.method]) {
       context[json.method].apply(context, json.arguments);
     }
-    $.protify(Jelly.Page.components).each(function(componentAndArgs) {
+    $.protify(page.components).each(function(componentAndArgs) {
       var component = componentAndArgs[0];
       if(component[json.method]) {
         component[json.method].apply(component, json.arguments);
