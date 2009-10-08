@@ -45,6 +45,19 @@ Jelly.initComponents = function() {
   });
 };
 
+Jelly.notifyObservers = function(params) {
+  var context = params.on ? eval(params.on) : page;
+  if(context[params.method]) {
+    context[params.method].apply(params, params.arguments);
+  }
+  $.protify(page.components).each(function(componentAndArgs) {
+    var component = componentAndArgs[0];
+    if(component[params.method]) {
+      component[params.method].apply(component, params.arguments);
+    }
+  });  
+};
+
 Jelly.Page = function(name) {
   this.name = name;
   this.components = [];

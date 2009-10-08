@@ -27,16 +27,7 @@ if(!window.Jelly) Jelly = new Object();
   };
 
   $.ajaxWithJelly.onSuccess = function(json) {
-    var context = json.on ? eval(json.on) : page;
-    if(context[json.method]) {
-      context[json.method].apply(context, json.arguments);
-    }
-    $.protify(page.components).each(function(componentAndArgs) {
-      var component = componentAndArgs[0];
-      if(component[json.method]) {
-        component[json.method].apply(component, json.arguments);
-      }
-    });
+    Jelly.notifyObservers(json);
     return true;
   };
 })(jQuery);
