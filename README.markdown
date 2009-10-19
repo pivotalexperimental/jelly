@@ -57,13 +57,13 @@ The `spread_jelly` line activates the events that you have defined on the curren
 Usage
 -------------
 
-Jelly maps page-specific Javascript functions to Rails Actions and Controllers. For example: FunController#index will
+Jelly maps page-specific Javascript functions to Rails Actions and Controllers. For example: StoriesController#index will
 activate the `index` function in the `Fun` Jelly object. Jelly uses jQuery's `$(document).ready()` to execute the
 page-specifc function when the page has loaded. Let's look at some code:
 
-In `public/javascripts/pages/fun.js`, I write a simple Jelly file:
+In `public/javascripts/pages/stories.js`, we create a simple Jelly file:
 
-    Jelly.add("Fun", {
+    Jelly.add("Stories", {
 
       index: function() {
         $('a.clickme').click(function() {
@@ -73,11 +73,11 @@ In `public/javascripts/pages/fun.js`, I write a simple Jelly file:
 
     });
 
-Jelly will automatically execute the `index` function when the Rails app runs the `FunController#index` action. Lets
+Jelly will automatically execute the `index` function when the Rails app runs the `StoriesController#index` action. Lets
 continue the example by adding more Javascript functions that map to the `new` and `show` Rails actions. We can also
-specify an `all` function, which will be executed on all actions in the `FunController`.
+specify an `all` function, which will be executed on all actions in the `StoriesController`.
 
-    Jelly.add("Fun", {
+    Jelly.add("Stories", {
 
       index: function() {
         $('a.clickme').click(function() {
@@ -103,53 +103,174 @@ Create a separate file in `public/javascripts/pages` for each of your controller
 AJAX With Jelly
 ---------------
 
-You can trigger callbacks on the page object from Rails with the `jelly_callback` method.
-Adding to the `index.html.erb` file from above:
+Jelly adds an `$.ajaxWithJelly()` function to the jQuery namespace which is a simple wrapper for jQuery's `$.ajax()`.
+When you use `$.ajaxWithJelly()` to create an ajax event, Jelly automatically adds an onSuccess handler to your ajax
+call that invokes the Jelly framework after receiving the ajax response.
 
-    <a href="#" id="jelly_ajax_link">Click me for Jelly Ajax Action</a>
-    <span id="jelly_callback_element">This gets filled in by the Jelly Ajax callback</span>
+Jelly's convention relies on the Controller to specify the javascript callback after an ajax request. We can invoke Jelly
+in response to a javascript request with the `jelly_callback` method.
 
-And update your controller:
+### Simple AJAX example with `$.ajaxWithJelly()` and `jelly_callback`
 
-    class FunController < ApplicationController
-      def index
+The view, `new.html.erb`:
+
+    <a href="#" id="create_story_link">create story</a>
+
+The controller, `stories_controller.rb`
+
+    class StoriesController < ApplicationController
+      def new
       end
 
-      def ajax_action
-        jelly_callback do
-          [
-            render(:partial => 'fun_partial'),
-            "second_parameter"
-          ]
+      def create
+        Story.create!(params[:story])
+        respond_to do |format|
+          format.html
+          format.js { jelly_callback }
         end
       end
     end
 
-Update your page object in `fun.js`:
+The javascript, `pages/stories.js`:
 
-    Jelly.add("Fun", {
-      all: function() {
-        $('title').text("Hello!  Isn't this fun?");
-      },
-      index: function() {
-        $('h1').text("Welcome to the index page.");
-        $("#jelly_ajax_link").click(function() {
+    Jelly.add("Stories", {
+
+      new: function() {
+        $("#create_story_link").click(function() {
           $.ajaxWithJelly({
-            type: "GET",
-            url: "/fun/ajax_action"
+            url: "/stories",
+            data: {
+              name : 'Untitled Story',
+            }
           });
         });
       },
-      on_ajax_action: function(html, second_parameter) {
-        $('#jelly_callback_element').html(html);
+
+      on_create: function() {
+        alert('Your story has been created!');
       }
     });
 
-And finally, make the partial `_fun_partial.html.erb` and just put "Hello from the server!" in it, then visit your page
-and watch the ajax callbacks in action.
+The example above attaches an ajax event to the "create story" link, and when clicked, jQuery will fire a ajax POST request to
+the create action of our controller. The controller then responds with `jelly_callback`, and by default invokes the
+javascript function named `on_create` in the Stories javascript file.
 
-The `jelly_callback` method takes an optional parameter for the name of the callback, and the provided block can return
-either one parameter, or an array of parameters.
+### Passing parameters to the Jelly callback target
+
+If we wanted to make the creation of the story a bit more interesting, we can send back a html fragment of the
+new story that has been created, and pass it as a parameter to `on_create` so it can be added to the page. Let's see how that might look:
+
+The view, `new.html.erb`:
+
+    <a href="#" id="create_story_link">create story</a>
+    <ul id="stories">
+      <li>First Story</li>
+    </ul>
+
+The controller, `stories_controller.rb`
+
+    class StoriesController < ApplicationController
+      def new
+      end
+
+      def create
+        Story.create!(params[:story])
+        respond_to do |format|
+          format.html
+          format.js do
+            jelly_callback do
+              render :partial => 'story_list_item'
+            end
+          end
+        end
+      end
+    end
+
+The javascript, `pages/stories.js`:
+
+    Jelly.add("Stories", {
+
+      new: function() {
+        $("#create_story_link").click(function() {
+          $.ajaxWithJelly({
+            url: "/stories",
+            data: {
+              name : 'Untitled Story',
+            }
+          });
+        });
+      },
+
+      on_create: function(storyListItemHtml) {
+        $("#stories").append(storyListItemHtml);
+      }
+    });
+
+The `jelly_callback` function accepts a block which is evaluated in the context of the view layer, which allows you to
+render partials and use Rails Helpers as you normally would. You can pass as many parameters as you want to the javascript
+callback by passing an array to the `jelly_callback` block:
+
+### Passing multiple parameters to the Jelly callback target
+
+in the controller, `stories_controller.rb`:
+
+    def create
+      @story = Story.create!(params[:story])
+      respond_to do |format|
+        format.html
+        format.js do
+          jelly_callback do
+            [ render(:partial => 'story_list_item'), @story.id, "Nice looking story, smart guy" ]
+          end
+        end
+      end
+    end
+
+in the javascript, `pages/stories.js`:
+
+    on_create: function(storyListItemHtml, storyId, message) {
+      $(storyListItemHtml).attr('id', storyId).appendTo($("#stories"));
+      alert(message);
+    },
+
+### Specifying custom callback functions in `jelly_callback`
+
+As we have seen above, by default, `jelly_callback` invokes the javascript function by prepending `on_` to the Rails
+action name. The `jelly_callback` method can take an optional parameter for the name of the callback to allow more fine-grained
+client-side behaviors depending on the server-side response.
+
+in the controller, `stories_controller.rb`
+
+    def create
+      begin
+        Story.create!(params[:story])
+        respond_to do |format|
+          format.html
+          format.js do
+            jelly_callback('successful_create') do
+              render :partial => 'story_list_item'
+            end
+          end
+        end
+      rescue
+        respond_to do |format|
+          format.html
+          format.js do
+            jelly_callback('failed_create')
+          end
+        end
+      end
+    end
+
+in the javascript, `pages/stories.js`:
+
+    on_successful_create: function(storyListItemHtml) {
+      $("#stories").append(storyListItemHtml);
+    },
+
+    on_failed_create: function() {
+      alert('Oops, there was a problem creating your story!);
+    }
 
 DEVELOPMENT
 -----------
