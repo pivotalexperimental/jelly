@@ -12,6 +12,14 @@ Jelly encourages and enables unit testing your Javascript code. Using a Javascri
 or [Screw Unit](http://github.com/nathansobo/screw-unit), Jelly allows you to test AJAX and client-side
 events independently from your Rails app.
 
+Key Benefits
+------------
+* [Unobtrusive Javascript](http://en.wikipedia.org/wiki/Unobtrusive_JavaScript). Your Javascript code remains completely
+separate from your markup.
+* [Test Driven Development](http://en.wikipedia.org/wiki/Test-driven_development). Jelly blends well with the Javascript testing framework
+[Jasmine](http://github.com/pivotal/jasmine) and allows you to test-drive your ajaxy and client-side code.
+* Familiar conventions. Jelly follows the conventions of Ruby on Rails, making it simple for developers to organize and keep track of their Javascript code.
+
 What Jelly is NOT
 -----------------
 **Jelly is NOT a Javascript generator.** With Jelly, you're writing pure Javascript to define your AJAX browser events. Jelly simply
@@ -41,7 +49,7 @@ Getting Started
 
 Be sure to require <code>jelly</code> when your application loads. This can be done in your `environment.rb` in the `Rails::Initializer.run` block:
 
-    config.gem "jelly"
+    config.gem 'jelly'
 
 Then, in your layouts, add the following to the `<head>` section:
 
@@ -54,14 +62,14 @@ expansion instead
 
 The `spread_jelly` line activates the events that you have defined on the current page.
 
-Usage
+Basic Usage
 -------------
 
 Jelly maps page-specific Javascript functions to Rails Actions and Controllers. For example: StoriesController#index will
 activate the `index` function in the `Fun` Jelly object. Jelly uses jQuery's `$(document).ready()` to execute the
 page-specifc function when the page has loaded. Let's look at some code:
 
-In `public/javascripts/pages/stories.js`, we create a simple Jelly file:
+In public/javascripts/pages/stories.js, we create a simple Jelly file:
 
     Jelly.add("Stories", {
 
@@ -100,6 +108,42 @@ specify an `all` function, which will be executed on all actions in the `Stories
 Notice the slightly different syntax for `new`. This is because `new` is a reserved word in Javascript.
 Create a separate file in `public/javascripts/pages` for each of your controllers as you use Jelly throughout your application.
 
+Common Components
+-----------------
+
+Often you will want to mix common Javascript components on many pages throughout your application, not just in the namespace
+of a single Controller. Jelly Components allow you to organize common Javascript code, and invoke it on arbitrary pages
+within your application.
+
+Jelly Components are simply Javascript classes with (at least) an `init` function. Here's an example of a `SearchBox` component that
+activates an autocompleter on a search box on every page.
+
+in public/javascripts/components/search_box.js:
+
+    SearchBox = {
+      init: function(){
+        $("#search_box").autocompleter({
+          url : '/search'
+        });
+      }
+    };
+
+To attach the SearchBox component to the page and automatically call the `init` function when the page is ready, we use the `attach_javascript_component`
+method in our view. This can be done either in your layout (for components to attach to all pages), or in your view using
+`content_for`.
+
+in the `<head>` tag of the layout:
+
+    <%= attach_javascript_component('SearchBox') %>
+
+or in a view:
+
+    <% content_for :javascript do -%>
+      <%= attach_javascript_component('SearchBox') %>
+    <% end -%>
+
+Components always get initialized **after** the page-specific Javascript functions.
+
 AJAX With Jelly
 ---------------
 
@@ -110,13 +154,15 @@ call that invokes the Jelly framework after receiving the ajax response.
 Jelly's convention relies on the Controller to specify the javascript callback after an ajax request. We can invoke Jelly
 in response to a javascript request with the `jelly_callback` method.
 
+This example assumes that you have working knowledge of jQuery's `$.ajax()` function. If not, [read up on it here](http://docs.jquery.com/Ajax).
+
 ### Simple AJAX example with `$.ajaxWithJelly()` and `jelly_callback`
 
-The view, `new.html.erb`:
+The view, new.html.erb:
 
     <a href="#" id="create_story_link">create story</a>
 
-The controller, `stories_controller.rb`
+The controller, stories_controller.rb
 
     class StoriesController < ApplicationController
       def new
@@ -131,7 +177,7 @@ The controller, `stories_controller.rb`
       end
     end
 
-The javascript, `pages/stories.js`:
+The javascript, pages/stories.js:
 
     Jelly.add("Stories", {
 
@@ -160,14 +206,14 @@ javascript function named `on_create` in the Stories javascript file.
 If we wanted to make the creation of the story a bit more interesting, we can send back a html fragment of the
 new story that has been created, and pass it as a parameter to `on_create` so it can be added to the page. Let's see how that might look:
 
-The view, `new.html.erb`:
+The view, new.html.erb:
 
     <a href="#" id="create_story_link">create story</a>
     <ul id="stories">
       <li>First Story</li>
     </ul>
 
-The controller, `stories_controller.rb`
+The controller, stories_controller.rb
 
     class StoriesController < ApplicationController
       def new
@@ -186,7 +232,7 @@ The controller, `stories_controller.rb`
       end
     end
 
-The javascript, `pages/stories.js`:
+The javascript, pages/stories.js:
 
     Jelly.add("Stories", {
 
@@ -212,7 +258,7 @@ callback by passing an array to the `jelly_callback` block:
 
 ### Passing multiple parameters to the Jelly callback target
 
-in the controller, `stories_controller.rb`:
+in the controller, stories_controller.rb:
 
     def create
       @story = Story.create!(params[:story])
@@ -226,20 +272,20 @@ in the controller, `stories_controller.rb`:
       end
     end
 
-in the javascript, `pages/stories.js`:
+in the javascript, pages/stories.js:
 
     on_create: function(storyListItemHtml, storyId, message) {
       $(storyListItemHtml).attr('id', storyId).appendTo($("#stories"));
       alert(message);
     },
 
-### Specifying custom callback functions in `jelly_callback`
+### Specifying custom callback functions in jelly_callback
 
 As we have seen above, by default, `jelly_callback` invokes the javascript function by prepending `on_` to the Rails
 action name. The `jelly_callback` method can take an optional parameter for the name of the callback to allow more fine-grained
 client-side behaviors depending on the server-side response.
 
-in the controller, `stories_controller.rb`
+in the controller, stories_controller.rb
 
     def create
       begin
@@ -262,7 +308,7 @@ in the controller, `stories_controller.rb`
       end
     end
 
-in the javascript, `pages/stories.js`:
+in the javascript, pages/stories.js:
 
     on_successful_create: function(storyListItemHtml) {
       $("#stories").append(storyListItemHtml);
@@ -272,11 +318,29 @@ in the javascript, `pages/stories.js`:
       alert('Oops, there was a problem creating your story!);
     }
 
-DEVELOPMENT
------------
+### Callbacks to Jelly Components
+
+By default, ajax callbacks functions are scoped to the current Jelly page. But if you want, you can also direct ajax
+callbacks to functions on Jelly components or other Javascript objects in your application. To
+do this, send an `:on` paremeter to `jelly_callback`, for example.
+
+in the controller:
+
+  respond_to do |format|
+    format.js do
+      jelly_callback('successful_create', :on => 'CommonHandler') do
+        render :partial => 'story_list_item'
+      end
+    end
+  end
+
+This will call `CommonHandler.on_successful_create()` with the response. 
+
+Jelly Development
+-----------------
 
 Track Jelly's development roadmap on [Jelly's Pivotal Tracker project](http://www.pivotaltracker.com/projects/30454)
 
 To run ruby tests, run `rake spec`.
 
-To run Javascript tests, open `jelly/spec/jasmine_runner.html` in a web browser.
+To run Javascript tests, open `jelly/spec/jasmine_runner.html` in Firefox or Safari.
