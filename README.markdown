@@ -326,13 +326,13 @@ do this, send an `:on` paremeter to `jelly_callback`, for example.
 
 in the controller:
 
-  respond_to do |format|
-    format.js do
-      jelly_callback('successful_create', :on => 'CommonHandler') do
-        render :partial => 'story_list_item'
+    respond_to do |format|
+      format.js do
+        jelly_callback('successful_create', :on => 'CommonHandler') do
+          render :partial => 'story_list_item'
+        end
       end
     end
-  end
 
 This will call `CommonHandler.on_successful_create()` with the response. 
 
