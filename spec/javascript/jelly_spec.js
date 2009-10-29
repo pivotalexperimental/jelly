@@ -147,6 +147,17 @@ describe("Jelly", function() {
         expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
       });
 
+      it("should call the callback method on the page, within the context of the page", function() {
+        page.on_my_method = function(arg1, arg2) {
+          expect(this).toEqual(page);
+        };
+
+        Jelly.notifyObservers({
+          "arguments":["arg1", "arg2"],
+          "method":"on_my_method"
+        });
+      });
+
       describe("when there are attached components", function() {
         it("calls the callback method on the page first and then on the component", function() {
           var component = function() {
