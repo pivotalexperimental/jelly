@@ -43,7 +43,7 @@ describe("Jelly", function() {
       delete Jelly.all["Foobar"];
     });
 
-    it("should call the page-specific js before the jelly components", function() {
+    it("should init the Jelly components before calling the page-specific js", function() {
       var thingsCalled = [];
 
       Jelly.add("MyController", {
@@ -58,7 +58,7 @@ describe("Jelly", function() {
 
       Jelly.activatePage('MyController', 'test_action');
 
-      expect(thingsCalled).toEqual(['page', 'components']);
+      expect(thingsCalled).toEqual(['components', 'page']);
     });
 
     describe("when the passed-in controllerName is defined", function() {

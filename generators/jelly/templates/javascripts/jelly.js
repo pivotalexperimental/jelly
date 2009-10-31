@@ -31,9 +31,9 @@ Jelly.activatePage = function(controllerName, actionName) {
 };
 
 Jelly._activatePage = function(actionName){
+  Jelly.initComponents();
   if(page.all) page.all();
   if(page[actionName]) page[actionName].call(page);
-  Jelly.initComponents();
   page.loaded = true;
 };
 
