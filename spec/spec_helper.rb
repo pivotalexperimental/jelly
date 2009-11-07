@@ -4,10 +4,26 @@ ENV["RAILS_ENV"] ||= 'test'
 ENV['RAILS_ROOT'] ||= File.dirname(__FILE__) + '/rails_root'
 require File.expand_path(File.join(ENV['RAILS_ROOT'], 'config/environment.rb'))
 require 'rubygems'
+gem "test-unit"
+require 'test/unit'
+
+class Test::Unit::TestCase
+  class << self
+    def inherited(sub_class)
+      super
+      DESCENDANTS << sub_class
+    end
+    alias_method :inherited_without_test_unit_gem_inherited_fix, :inherited
+    alias_method :inherited, :inherited_without_test_unit_gem_inherited_fix
+  end
+end
+
 require 'spec'
 require 'spec/rails'
+require 'spec/autorun'
 
-require File.dirname(__FILE__) + "/../lib/jelly"
+$LOAD_PATH.unshift(File.expand_path("#{File.dirname(__FILE__)}/../lib"))
+require "jelly"
 
 Spec::Runner.configure do |configuration|
 end

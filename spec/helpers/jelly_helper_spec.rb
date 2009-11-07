@@ -1,6 +1,6 @@
-require File.dirname(__FILE__) + '/../spec_helper.rb'
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper.rb')
 
-describe "JellyHelper" do
+describe JellyHelper do
 
   describe "#init_specific_javascript" do
     it "should create a javascript include tag to initialize the Page object" do
