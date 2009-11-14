@@ -11,87 +11,88 @@
  *
  */
 
-if(!window.Jelly) Jelly = new Object();
-Jelly.all = {};
-
-Jelly.add = function(name) {
-  var page = new Jelly.Page(name);
-  for(var i=1; i < arguments.length; i++) {
-    $.extend(page, arguments[i]);
-  }
-  return page;
-};
-
-var page;
-Jelly.activatePage = function(controllerName, actionName) {
-  page = Jelly.all[controllerName] || new Jelly.Page(controllerName);
-  $(document).ready(function(){
-    Jelly._activatePage(actionName);
+if (!window.Jelly) Jelly = new Object();
+Jelly.init = function() {
+  this.components = [];
+  Jelly.Pages.init();
+  $(document).ready(function() {
+    Jelly.Components.init();
   });
 };
 
-Jelly._activatePage = function(actionName){
-  Jelly.initComponents();
-  if(page.all) page.all();
-  if(page[actionName]) page[actionName].call(page);
-  page.loaded = true;
-};
-
-Jelly.initComponents = function() {
-  $.protify(page.components).each(function(componentAndArgs) {
-    var component = componentAndArgs[0];
-    var args = componentAndArgs[1] || [];
-    if(component.init) component.init.apply(component, args);
-  });
+Jelly.attach = function(component, args) {
+  this.components.push([component, args]);
 };
 
 Jelly.notifyObservers = function(params) {
   var context = params.on ? eval(params.on) : page;
-  if(context[params.method]) {
+  if (context[params.method]) {
     context[params.method].apply(context, params.arguments);
   }
-  $.protify(page.components).each(function(componentAndArgs) {
+  $.protify(Jelly.components).each(function(componentAndArgs) {
     var component = componentAndArgs[0];
-    if(component[params.method]) {
+    if (component[params.method]) {
       component[params.method].apply(component, params.arguments);
     }
   });
 };
 
-Jelly.Page = function(name) {
-  this.name = name;
-  this.components = [];
-  Jelly.all[name] = this;
+Jelly.Components = {
+  init: function() {
+    $.protify(Jelly.components).each(function(componentAndArgs) {
+      var component = componentAndArgs[0];
+      var args = componentAndArgs[1] || [];
+      if (component.init) component.init.apply(component, args);
+    });
+  }
 };
 
+Jelly.Pages = {
+  init: function() {
+    this.all = {};
+    Jelly.all = this.all; // Deprecated
+  },
+
+  add: function(name) {
+    var page = new Jelly.Page(name);
+    for (var i = 1; i < arguments.length; i++) {
+      $.extend(page, arguments[i]);
+    }
+    return page;
+  }
+};
+Jelly.add = Jelly.Pages.add; // Deprecated
+
+Jelly.Page = function(name) {
+  this.documentHref = Jelly.Location.documentHref;
+
+  this.name = name;
+  this.components = [];
+  Jelly.Pages.all[name] = this;
+};
 Jelly.Page.prototype.loaded = false;
 Jelly.Page.prototype.all = function() {
 };
-Jelly.Page.prototype.documentHref = function() {
-  return document.location.href;
-};
-Jelly.Page.prototype.on_redirect = function(location){
-  top.location.href = location;
+
+Jelly.Page.init = function(controllerName, actionName) {
+  var page = Jelly.Pages.all[controllerName] || new Jelly.Page(controllerName);
+  window.page = page;
+  if (page.all) page.all();
+  if (page[actionName]) page[actionName].call(page);
+  page.loaded = true;
 };
 
-Jelly.Page.prototype.attach = function(component, args) {
-  var methodNames = [];
-  for(var methodName in component.pageMixin) {
-    methodNames.push(methodName);
+Jelly.Location = {
+  init: function() {
+  },
+
+  documentHref: function() {
+    return document.location.href;
+  },
+
+  on_redirect: function(location) {
+    top.location.href = location;
   }
-  var self = this;
-  $.protify(methodNames).each(function(methodName) {
-    // TODO: is anybody using these before_/after_ hooks?  if not, delete them and use components as observers
-    self[methodName] = function() {
-      if(this['before_' + methodName]) {
-        this['before_' + methodName].apply(this, arguments);
-      }
-      var returnValue = component.pageMixin[methodName].apply(this, arguments);
-      if(this['after_' + methodName]) {
-        this['after_' + methodName].apply(this, arguments);
-      }
-      return returnValue;
-    };
-  });
-  page.components.push([component, args]);
 };
+
+Jelly.init();
