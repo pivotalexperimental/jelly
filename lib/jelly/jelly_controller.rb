@@ -1,5 +1,6 @@
 module JellyController
   protected
+  include Jelly::Common
 
   def jelly_callback(callback_base_name = @action_name, options = {}, &block)
     render :inline => jelly_callback_erb("on_#{callback_base_name}", options, block)
@@ -13,7 +14,7 @@ module JellyController
       <%= begin
         args = @block ? instance_eval(&@block) : []
         args = [args] unless args.is_a?(Array)
-        {"method" => @callback_name, "arguments" => args}.reverse_merge(@options).to_json
+        jelly_callback_hash(@callback_name, *args).reverse_merge(@options).to_json
       end %>
     ERB
     request.xhr? ? erb : "<textarea>#{erb}</textarea>"
