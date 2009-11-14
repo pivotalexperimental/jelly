@@ -86,10 +86,6 @@ Jelly.Location = {
   init: function() {
   },
 
-  documentHref: function() {
-    return document.location.href;
-  },
-
   on_redirect: function(location) {
     top.location.href = location;
   }

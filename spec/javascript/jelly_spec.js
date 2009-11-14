@@ -253,18 +253,25 @@ describe("Jelly.Page", function() {
 });
 
 describe("Jelly.Location", function() {
-  var our_token;
+  var our_token, originalTop;
 
   beforeEach(function() {
     spyOn($, 'ajax');
     our_token = "authenticity token";
     window._token = our_token;
     Jelly.init();
+    originalTop = top;
   });
 
-  describe(".documentHref", function() {
-    it("returns document.location.href", function() {
-      expect(Jelly.Location.documentHref()).toEqual(document.location.href);
+  afterEach(function() {
+    top = originalTop;
+  });
+
+  describe(".on_redirect", function() {
+    it("sets top.location.href to the given location", function() {
+      top = {location: {}};
+      Jelly.Location.on_redirect("http://mars.com");
+      expect(top.location.href).toEqual("http://mars.com");
     });
   });
 });
