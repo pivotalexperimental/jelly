@@ -251,3 +251,20 @@ describe("Jelly.Page", function() {
     });
   });
 });
+
+describe("Jelly.Location", function() {
+  var our_token;
+
+  beforeEach(function() {
+    spyOn($, 'ajax');
+    our_token = "authenticity token";
+    window._token = our_token;
+    Jelly.init();
+  });
+
+  describe(".documentHref", function() {
+    it("returns document.location.href", function() {
+      expect(Jelly.Location.documentHref()).toEqual(document.location.href);
+    });
+  });
+});
