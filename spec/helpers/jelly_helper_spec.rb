@@ -9,9 +9,10 @@ describe JellyHelper do
       helper.should_receive(:form_authenticity_token).and_return('areallysecuretoken')
     end
 
-    it "should create a javascript include tag to initialize the Page object and attach the Jelly.Page component" do
+    it "should create a javascript include tag that attaches the Jelly.Location and Jelly.Page components" do
       output = helper.spread_jelly
       output.should include('<script type="text/javascript">')
+      output.should include("Jelly.attach(Jelly.Location, #{[].to_json});")
       output.should include("Jelly.attach(Jelly.Page, #{['MyFunController', 'super_good_action'].to_json});")
     end
   end

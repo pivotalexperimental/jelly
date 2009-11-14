@@ -12,6 +12,7 @@ module JellyHelper
   end
 
   def spread_jelly
+    attach_javascript_component("Jelly.Location")
     attach_javascript_component("Jelly.Page", controller.controller_path.camelcase, controller.action_name)
     javascript_tag <<-JS
       window._token = '#{form_authenticity_token}'
