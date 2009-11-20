@@ -1,5 +1,6 @@
 raise "Jelly must be used in a Rails environment." unless defined?(ActionController)
 
+require 'jelly/common'
 require 'jelly/jelly_controller'
 require 'jelly/jelly_helper'
 

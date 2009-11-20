@@ -2,14 +2,18 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper.rb')
 
 describe JellyHelper do
 
-  describe "#init_specific_javascript" do
-    it "should create a javascript include tag to initialize the Page object" do
+  describe "#spread_jelly" do
+    before do
       stub_controller = mock(Object, :controller_path => 'my_fun_controller', :action_name => 'super_good_action')
       helper.should_receive(:controller).any_number_of_times.and_return(stub_controller)
       helper.should_receive(:form_authenticity_token).and_return('areallysecuretoken')
+    end
+
+    it "should create a javascript include tag that attaches the Jelly.Location and Jelly.Page components" do
       output = helper.spread_jelly
       output.should include('<script type="text/javascript">')
-      output.should include("Jelly.activatePage('MyFunController', 'super_good_action');")
+      output.should include("Jelly.attach(Jelly.Location, #{[].to_json});")
+      output.should include("Jelly.attach(Jelly.Page, #{['MyFunController', 'super_good_action'].to_json});")
     end
   end
 
@@ -41,23 +45,23 @@ describe JellyHelper do
       helper.clear_jelly_attached()
     end
 
-    it "fails to add multiple calls to page.attach for the same component" do
+    it "fails to add multiple calls to Jelly.attach for the same component" do
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg5')
-      assigns[:content_for_javascript].should == 'page.attach(MyComponent, ["arg1","arg2","arg3"]);page.attach(MyComponent, ["arg1","arg2","arg5"]);'
+      assigns[:content_for_javascript].should == 'Jelly.attach(MyComponent, ["arg1","arg2","arg3"]);Jelly.attach(MyComponent, ["arg1","arg2","arg5"]);'
     end
 
-    it "adds a call to page.attach in the javascript content" do
+    it "adds a call to Jelly.attach in the javascript content" do
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       expected_args = ['arg1','arg2','arg3'].to_json
-      assigns[:content_for_javascript].should == "page.attach(MyComponent, #{expected_args});"
+      assigns[:content_for_javascript].should == "Jelly.attach(MyComponent, #{expected_args});"
     end
 
-    it "adds a call to page.attach in the javascript_on_ready content" do
+    it "adds a call to Jelly.attach in the javascript_on_ready content" do
       helper.attach_javascript_component_on_ready("MyComponent", 'arg1', 'arg2', 'arg3')
       expected_args = ['arg1','arg2','arg3'].to_json
-      assigns[:content_for_javascript_on_ready].should == "page.attach(MyComponent, #{expected_args});"
+      assigns[:content_for_javascript_on_ready].should == "Jelly.attach(MyComponent, #{expected_args});"
     end
 
   end
