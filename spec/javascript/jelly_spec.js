@@ -217,6 +217,19 @@ describe("Jelly", function() {
           });
           expect(callbackObject.secondObject.on_my_method).wasCalledWith('arg1', 'arg2');
         });
+
+        describe("when that object is also a component", function () {
+          it("should only call the callback once", function() {
+            page.attach(callbackObject.secondObject);
+            spyOn(callbackObject.secondObject, 'on_my_method');
+            Jelly.notifyObservers({
+              "arguments":["arg1", "arg2"],
+              "method":"on_my_method",
+              "on":"callbackObject.secondObject"
+            });
+            expect(callbackObject.secondObject.on_my_method.callCount).toEqual(1);  
+          });
+        });
       });
 
       describe("when the 'on' object does not define the callback method", function() {

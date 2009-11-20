@@ -52,7 +52,7 @@ Jelly.notifyObservers = function(params) {
   }
   $.protify(page.components).each(function(componentAndArgs) {
     var component = componentAndArgs[0];
-    if(component[params.method]) {
+    if(component[params.method] && component != context) {
       component[params.method].apply(component, params.arguments);
     }
   });
