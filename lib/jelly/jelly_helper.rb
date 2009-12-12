@@ -15,34 +15,42 @@ module JellyHelper
     attach_javascript_component("Jelly.Location")
     attach_javascript_component("Jelly.Page", controller.controller_path.camelcase, controller.action_name)
     javascript_tag <<-JS
-      window._token = '#{form_authenticity_token}'
-      #{@content_for_javascript}
+      #{javascript_set_window_token}
+      Jelly.attach(#{jelly_attached_components.to_json});
       $(document).ready(function() {
-        #{@content_for_javascript_on_ready}
+        Jelly.attach(#{jelly_attached_components_on_ready.to_json});
       });
     JS
   end
 
-  def clear_jelly_attached()
-    @jelly_attached_components = []
+  def javascript_set_window_token
+    "window._token = '#{form_authenticity_token}';"
+  end
+
+  def clear_jelly_attached
+    jelly_attached_components.clear
   end
 
   def attach_javascript_component(component_name, *args)
-    @jelly_attached_components ||= []    
-    key = "Jelly.attach(#{component_name}, #{args.to_json});"
-    unless @jelly_attached_components.include? key
-      @jelly_attached_components << key
-      content_for(:javascript, key)
+    key = {'name' => component_name, 'arguments' => args}
+    unless jelly_attached_components.include? key
+      jelly_attached_components << key
     end
   end
 
   def attach_javascript_component_on_ready(component_name, *args)
-    @jelly_attached_components_on_ready ||= []
-    key = "Jelly.attach(#{component_name}, #{args.to_json});"
-    unless @jelly_attached_components_on_ready.include? key
-      @jelly_attached_components_on_ready << key
-      content_for(:javascript_on_ready, key)
+    key = {'name' => component_name, 'arguments' => args}
+    unless jelly_attached_components_on_ready.include? key
+      jelly_attached_components_on_ready << key
     end
+  end
+
+  def jelly_attached_components
+    @jelly_attached_components ||= []
+  end
+
+  def jelly_attached_components_on_ready
+    @jelly_attached_components_on_ready ||= []
   end
 
 end
