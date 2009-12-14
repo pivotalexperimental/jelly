@@ -71,7 +71,7 @@ page-specifc function when the page has loaded. Let's look at some code:
 
 In public/javascripts/pages/stories.js, we create a simple Jelly file:
 
-    Jelly.add("Stories", {
+    Jelly.Pages.add("Stories", {
 
       index: function() {
         $('a.clickme').click(function() {
@@ -85,7 +85,7 @@ Jelly will automatically execute the `index` function when the Rails app runs th
 continue the example by adding more Javascript functions that map to the `new` and `show` Rails actions. We can also
 specify an `all` function, which will be executed on all actions in the `StoriesController`.
 
-    Jelly.add("Stories", {
+    Jelly.Pages.add("Stories", {
 
       index: function() {
         $('a.clickme').click(function() {
@@ -134,15 +134,15 @@ method in our view. This can be done either in your layout (for components to at
 
 in the `<head>` tag of the layout:
 
-    <%= attach_javascript_component('SearchBox') %>
+    <% attach_javascript_component('SearchBox') %>
 
 or in a view:
 
     <% content_for :javascript do -%>
-      <%= attach_javascript_component('SearchBox') %>
+      <% attach_javascript_component('SearchBox') %>
     <% end -%>
 
-Components always get initialized **after** the page-specific Javascript functions.
+Components are initialized **before** the page-specific Javascript functions by default.
 
 AJAX With Jelly
 ---------------
@@ -179,7 +179,7 @@ The controller, stories_controller.rb
 
 The javascript, pages/stories.js:
 
-    Jelly.add("Stories", {
+    Jelly.Pages.add("Stories", {
 
       new: function() {
         $("#create_story_link").click(function() {
@@ -234,7 +234,7 @@ The controller, stories_controller.rb
 
 The javascript, pages/stories.js:
 
-    Jelly.add("Stories", {
+    Jelly.Pages.add("Stories", {
 
       new: function() {
         $("#create_story_link").click(function() {
