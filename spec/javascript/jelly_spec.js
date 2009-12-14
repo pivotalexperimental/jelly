@@ -22,7 +22,7 @@ describe("Jelly", function() {
       };
       var indexFn = function() {
       };
-      var newPage = Jelly.add("test-name", {show: showFn}, {'new': newFn}, {index: indexFn});
+      var newPage = Jelly.Pages.add("test-name", {show: showFn}, {'new': newFn}, {index: indexFn});
       expect(Jelly.Pages.all["test-name"]).toNotEqual(undefined);
       expect(newPage).toEqual(Jelly.Pages.all["test-name"]);
       expect(newPage.show).toEqual(showFn);
@@ -35,7 +35,7 @@ describe("Jelly", function() {
     it("should init the Jelly components", function() {
       var thingsCalled = [];
 
-      Jelly.add("MyController", {
+      Jelly.Pages.add("MyController", {
         test_action: function() {
           thingsCalled.push('page');
         }
@@ -51,9 +51,33 @@ describe("Jelly", function() {
     });
   });
 
+  describe(".attach", function() {
+    it("adds the given component (evaluating strings) and argument definitions to Jelly.components", function() {
+      var component1 = {
+        init: function() {
+        }
+      };
+      var component2 = {
+        init: function() {
+        }
+      };
+      Jelly.attach(
+        {component: "Jelly.Page", arguments: ["MyPage", "index"]},
+        {component: component1, arguments: [1, 2]},
+        {component: component2, arguments: [3, 4, 5]}
+      );
+
+      expect(Jelly.components).toEqual([
+        {component: Jelly.Page, arguments: ["MyPage", "index"]},
+        {component: component1, arguments: [1, 2]},
+        {component: component2, arguments: [3, 4, 5]}
+      ]);
+    });
+  });
+
   describe(".notifyObservers", function() {
     beforeEach(function() {
-      Jelly.add("MyPage", {
+      Jelly.Pages.add("MyPage", {
         on_my_method : function() {
         }
       });
@@ -88,8 +112,8 @@ describe("Jelly", function() {
             on_my_method: function() {
             }
           };
-          Jelly.attach(Jelly.Page, "MyPage", "index");
-          Jelly.attach(component);
+          Jelly.attach({component: "Jelly.Page", arguments: ["MyPage", "index"]});
+          Jelly.attach({component: component, arguments: []});
 
           var functionsCalledInOrder = [];
           spyOn(page, 'on_my_method').andCallFake(function() {
@@ -145,7 +169,7 @@ describe("Jelly", function() {
 
         describe("when that object is also a component", function () {
           it("should only call the callback once", function() {
-            Jelly.attach(callbackObject.secondObject);
+            Jelly.attach({component: callbackObject.secondObject, arguments: []});
             spyOn(callbackObject.secondObject, 'on_my_method');
             Jelly.notifyObservers({
               "arguments":["arg1", "arg2"],

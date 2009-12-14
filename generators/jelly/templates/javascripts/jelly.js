@@ -20,8 +20,17 @@ Jelly.init = function() {
   });
 };
 
-Jelly.attach = function(component, args) {
-  this.components.push([component, args]);
+Jelly.attach = function() {
+  for(var i = 0; i < arguments.length; i++) {
+    var definition = arguments[i];
+    var component = (typeof definition.component == "string") ?
+                    eval(definition.component) :
+                    definition.component;
+    this.components.push({
+      component: component,
+      arguments: definition.arguments
+    });
+  }
 };
 
 Jelly.notifyObservers = function(params) {
@@ -29,21 +38,22 @@ Jelly.notifyObservers = function(params) {
   if (context[params.method]) {
     context[params.method].apply(context, params.arguments);
   }
-  $.protify(Jelly.components).each(function(componentAndArgs) {
-    var component = componentAndArgs[0];
-    if (component[params.method] && component != context) {
-      component[params.method].apply(component, params.arguments);
-    }
-  });
+  for(var i = 0; i < Jelly.components.length; i++) {
+    var definition = Jelly.components[i];
+    if (definition.component[params.method] && definition.component != context) {
+      definition.component[params.method].apply(definition.component, params.arguments);
+    }    
+  }
 };
 
 Jelly.Components = {
   init: function() {
-    $.protify(Jelly.components).each(function(componentAndArgs) {
-      var component = componentAndArgs[0];
-      var args = componentAndArgs[1] || [];
-      if (component.init) component.init.apply(component, args);
-    });
+    for(var i = 0; i < Jelly.components.length; i++) {
+      var definition = Jelly.components[i];
+      if (definition.component.init) {
+        definition.component.init.apply(definition.component, definition.arguments);
+      }
+    }
   }
 };
 
@@ -67,7 +77,6 @@ Jelly.Page = function(name) {
   this.documentHref = Jelly.Location.documentHref;
 
   this.name = name;
-  this.components = [];
   Jelly.Pages.all[name] = this;
 };
 Jelly.Page.prototype.loaded = false;

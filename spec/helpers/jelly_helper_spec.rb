@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper.rb')
 describe JellyHelper do
 
   def jelly_attach_arguments(html)
-    JSON.parse(Regexp.new('Jelly\.attach\((.*)\);').match(html)[1])
+    JSON.parse(Regexp.new('Jelly\.attach\.apply\(Jelly, (.*)\);').match(html)[1])
   end
 
   describe "#spread_jelly" do
@@ -17,8 +17,8 @@ describe JellyHelper do
       output = helper.spread_jelly
       output.should include('<script type="text/javascript">')
       argument = jelly_attach_arguments(output)
-      argument.should include({'name' => "Jelly.Location", 'arguments' => []})
-      argument.should include({'name' => "Jelly.Page", 'arguments' => ['MyFunController', 'super_good_action']})
+      argument.should include({'component' => "Jelly.Location", 'arguments' => []})
+      argument.should include({'component' => "Jelly.Page", 'arguments' => ['MyFunController', 'super_good_action']})
     end
   end
 
@@ -58,8 +58,8 @@ describe JellyHelper do
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg5')
       assigns[:jelly_attached_components].should == [
-        {'name' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']},
-        {'name' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg5']},
+        {'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']},
+        {'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg5']},
       ]
     end
 
@@ -67,7 +67,7 @@ describe JellyHelper do
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       expected_args = ['arg1','arg2','arg3'].to_json
       assigns[:jelly_attached_components].should == [
-        {'name' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']}
+        {'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']}
       ]
 
       html = helper.spread_jelly
@@ -75,21 +75,21 @@ describe JellyHelper do
       pre_document_ready_part.split("\n")[0].should_not include("$(document).ready(function() {")
 
       arguments = jelly_attach_arguments(pre_document_ready_part)
-      arguments.should include({'name' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']})
+      arguments.should include({'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']})
     end
 
     it "adds a call to Jelly.attach in the javascript_on_ready content" do
       helper.attach_javascript_component_on_ready("MyComponent", 'arg1', 'arg2', 'arg3')
 
       assigns[:jelly_attached_components_on_ready].should == [
-        {'name' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']}
+        {'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']}
       ]
 
       html = helper.spread_jelly
       document_ready_part = html.split("\n")[4..-1].join("\n")
       document_ready_part.split("\n")[0].should include("$(document).ready(function() {")
       arguments = jelly_attach_arguments(document_ready_part)
-      arguments.should include({'name' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']})
+      arguments.should include({'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']})
     end
 
   end
