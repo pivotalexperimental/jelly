@@ -192,6 +192,38 @@ describe("Jelly", function() {
         });
       });
     });
+
+    describe("when passed custom observers", function() {
+      it("notifies the given observers and not the existing Jelly.components, unless in the list of observers", function() {
+        var component = {
+          on_my_method: function() {
+          }
+        };
+        Jelly.attach({component: "Jelly.Page", arguments: ["MyPage", "index"]});
+        Jelly.attach({component: component, arguments: []});
+
+        spyOn(page, 'on_my_method');
+        spyOn(component, 'on_my_method');
+
+        var customObserver1 = {on_my_method: function() {}};
+        spyOn(customObserver1, 'on_my_method');
+        var customObserver2 = {on_my_method: function() {}};
+        spyOn(customObserver2, 'on_my_method');
+
+        Jelly.notifyObservers({
+          "arguments":["arg1", "arg2"],
+          "method":"on_my_method"
+        }, [customObserver1, customObserver2]);
+
+        expect(page.on_my_method).wasNotCalled();
+        expect(component.on_my_method).wasNotCalled();
+
+        expect(customObserver1.on_my_method).wasCalled();
+        expect(customObserver1.on_my_method).wasCalledWith('arg1', 'arg2');
+        expect(customObserver2.on_my_method).wasCalled();
+        expect(customObserver2.on_my_method).wasCalledWith('arg1', 'arg2');
+      });
+    });
   });
 });
 

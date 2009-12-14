@@ -33,15 +33,25 @@ Jelly.attach = function() {
   }
 };
 
-Jelly.notifyObservers = function(params) {
-  var context = params.on ? eval(params.on) : page;
-  if (context[params.method]) {
-    context[params.method].apply(context, params.arguments);
+Jelly.notifyObservers = function(params, observers) {
+  var context;
+  if (!observers) {
+    // Deprecate 'on' in favor of making each page action a Component.
+    context = params.on ? eval(params.on) : page;
+    observers = [context];
+
+    for(var i=0; i < Jelly.components.length; i++) {
+      var component = Jelly.components[i].component;
+      if (component != context) {
+        observers.push(component);
+      }
+    }
   }
-  for(var i = 0; i < Jelly.components.length; i++) {
-    var definition = Jelly.components[i];
-    if (definition.component[params.method] && definition.component != context) {
-      definition.component[params.method].apply(definition.component, params.arguments);
+
+  for(var i = 0; i < observers.length; i++) {
+    var observer = observers[i];
+    if (observer[params.method]) {
+      observer[params.method].apply(observer, params.arguments);
     }    
   }
 };
