@@ -35,7 +35,7 @@ module JellyHelper
     javascript_tag <<-JS
       $(document).ready(function() {
         Jelly.attach.apply(Jelly, #{components.to_json});
-      }
+      });
     JS
   end
 
