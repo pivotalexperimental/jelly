@@ -21,6 +21,7 @@ end
 require 'spec'
 require 'spec/rails'
 require 'spec/autorun'
+require 'nokogiri'
 
 $LOAD_PATH.unshift(File.expand_path("#{File.dirname(__FILE__)}/../lib"))
 require "jelly"
