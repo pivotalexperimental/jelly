@@ -2,7 +2,7 @@
  *  Jelly. a sweet unobtrusive javascript framework
  *  for jQuery and Rails
  *
- *  version 0.5
+ *  version 0.6.6
  *
  * Copyright (c) 2009 Pivotal Labs
  * Licensed under the MIT license.
@@ -52,7 +52,7 @@ Jelly.notifyObservers = function(params, observers) {
     var observer = observers[i];
     if (observer[params.method]) {
       observer[params.method].apply(observer, params.arguments);
-    }    
+    }
   }
 };
 
