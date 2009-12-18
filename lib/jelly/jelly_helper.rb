@@ -32,14 +32,14 @@ module JellyHelper
   end
 
   def attach_javascript_component(component_name, *args)
-    key = {'component' => component_name, 'arguments' => args}
+    key = jelly_attach_component_definition_hash(component_name, *args)
     unless jelly_attached_components.include? key
       jelly_attached_components << key
     end
   end
 
   def attach_javascript_component_on_ready(component_name, *args)
-    key = {'component' => component_name, 'arguments' => args}
+    key = jelly_attach_component_definition_hash(component_name, *args)
     unless jelly_attached_components_on_ready.include? key
       jelly_attached_components_on_ready << key
     end
