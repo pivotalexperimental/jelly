@@ -16,9 +16,9 @@ module JellyHelper
     attach_javascript_component("Jelly.Page", controller.controller_path.camelcase, controller.action_name)
     javascript_tag <<-JS
       #{javascript_set_window_token}
-      Jelly.attach.apply(Jelly, #{jelly_attached_components.to_json});
+      Jelly.attach.call(Jelly, #{jelly_attached_components.to_json});
       $(document).ready(function() {
-        Jelly.attach.apply(Jelly, #{jelly_attached_components_on_ready.to_json});
+        Jelly.attach.call(Jelly, #{jelly_attached_components_on_ready.to_json});
       });
     JS
   end
