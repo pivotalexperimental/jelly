@@ -73,6 +73,50 @@ describe("Jelly", function() {
         {component: component2, arguments: [3, 4, 5]}
       ]);
     });
+
+    describe("when Jelly.Components.initCalled is false", function() {
+      beforeEach(function() {
+        Jelly.Components.initCalled = false;
+        expect(Jelly.Components.initCalled).toEqual(false);
+      });
+
+      it("appends the component into Jelly.components and does not call init on the given component until Jelly.Components.init is called", function() {
+        var component = {
+          init: function() {
+          }
+        };
+        spyOn(component, "init");
+
+//        Jelly.attach(
+//          {component: "Jelly.Page", arguments: ["MyPage", "index"]},
+//          {component: component, arguments: [1, 2]}
+//        );
+//        expect(Jelly.components).toContain({component: component, arguments: [1, 2]});
+//        expect(component.init).wasNotCalled();
+
+//        Jelly.Components.init();
+//        expect(component.init).wasCalledWith(1, 2);
+      });
+    });
+
+    describe("when Jelly.Components.initCalled is true", function() {
+      beforeEach(function() {
+        Jelly.attach({component: "Jelly.Page", arguments: ["MyPage", "index"]});
+        Jelly.Components.init();
+        expect(Jelly.Components.initCalled).toEqual(true);
+      });
+
+      it("appends the component into Jelly.components and calls init on the given component", function() {
+        var component = {
+          init: function() {
+          }
+        };
+        spyOn(component, "init");
+        Jelly.attach({component: component, arguments: [1, 2]});
+        expect(Jelly.components).toContain({component: component, arguments: [1, 2]});
+        expect(component.init).wasCalledWith(1, 2);
+      });
+    });
   });
 
   describe(".notifyObservers", function() {
@@ -81,7 +125,7 @@ describe("Jelly", function() {
         on_my_method : function() {
         }
       });
-      page = Jelly.Pages.all["MyPage"];
+      Jelly.attach({component: "Jelly.Page", arguments: ["MyPage", "index"]});
     });
 
     describe("when the callback method is defined on the page", function() {
@@ -112,7 +156,6 @@ describe("Jelly", function() {
             on_my_method: function() {
             }
           };
-          Jelly.attach({component: "Jelly.Page", arguments: ["MyPage", "index"]});
           Jelly.attach({component: component, arguments: []});
 
           var functionsCalledInOrder = [];
@@ -239,7 +282,7 @@ describe("Jelly.Page", function() {
 
   describe(".init", function() {
     beforeEach(function() {
-      Jelly.Pages.add("Foobar", {
+      Jelly.Pages.add("DefinedComponent", {
         baz : function() {
         },
         all : function() {
@@ -247,19 +290,19 @@ describe("Jelly.Page", function() {
         show: function() {
         }
       });
-      spyOn(Jelly.Pages.all["Foobar"], "show");
+      spyOn(Jelly.Pages.all["DefinedComponent"], "show");
     });
 
     afterEach(function() {
-      delete Jelly.Pages.all["Foobar"];
+      delete Jelly.Pages.all["DefinedComponent"];
     });
 
     describe("when the passed-in controllerName is defined", function() {
       describe("when the actionName is defined", function() {
         it("invokes the page-specific method", function() {
-          var foobar = Jelly.Pages.all["Foobar"];
+          var foobar = Jelly.Pages.all["DefinedComponent"];
           expect(foobar.show).wasNotCalled();
-          Jelly.Page.init("Foobar", "show");
+          Jelly.Page.init("DefinedComponent", "show");
           expect(foobar.show).wasCalled();
         });
 
@@ -267,17 +310,17 @@ describe("Jelly.Page", function() {
           var invokedMethods;
           beforeEach(function() {
             invokedMethods = [];
-            spyOn(Jelly.Pages.all["Foobar"], "all").andCallFake(function() {
+            spyOn(Jelly.Pages.all["DefinedComponent"], "all").andCallFake(function() {
               invokedMethods.push("all");
             });
-            spyOn(Jelly.Pages.all["Foobar"], "baz").andCallFake(function() {
+            spyOn(Jelly.Pages.all["DefinedComponent"], "baz").andCallFake(function() {
               invokedMethods.push("baz");
             });
           });
 
           it("invokes the all method before invoking the page-specific method", function() {
             expect(invokedMethods).toEqual([]);
-            Jelly.Page.init("Foobar", "baz");
+            Jelly.Page.init("DefinedComponent", "baz");
             expect(invokedMethods).toEqual(['all', 'baz']);
           });
         });
@@ -285,23 +328,23 @@ describe("Jelly.Page", function() {
 
       describe("when the actionName is not defined", function() {
         it("does not blow up", function() {
-          expect(Jelly.Pages.all["Foobar"].easterBunny).toEqual(undefined);
-          Jelly.Page.init("Foobar", "easterBunny");
+          expect(Jelly.Pages.all["DefinedComponent"].easterBunny).toEqual(undefined);
+          Jelly.Page.init("DefinedComponent", "easterBunny");
         });
 
         describe("when the 'all' method is defined", function() {
           var invokedMethods;
           beforeEach(function() {
             invokedMethods = [];
-            Jelly.Pages.all["Foobar"].all = function() {
+            Jelly.Pages.all["DefinedComponent"].all = function() {
               invokedMethods.push("all");
             };
           });
 
           it("invokes the all method", function() {
-            expect(Jelly.Pages.all["Foobar"].easterBunny).toEqual(undefined);
+            expect(Jelly.Pages.all["DefinedComponent"].easterBunny).toEqual(undefined);
             expect(invokedMethods).toEqual([]);
-            Jelly.Page.init("Foobar", "easterBunny");
+            Jelly.Page.init("DefinedComponent", "easterBunny");
             expect(invokedMethods).toEqual(['all']);
           });
         });
@@ -309,13 +352,9 @@ describe("Jelly.Page", function() {
     });
 
     describe("when the passed-in controllerName is not defined", function() {
-      it("invokes all method on an anonymous Page", function() {
-        spyOn(Jelly.Page.prototype, "all");
-        expect(Jelly.Pages.all["Baz"]).toEqual(undefined);
-
-        Jelly.Page.init("Baz", "easterBunny");
-
-        expect(Jelly.Pages.all["Baz"].all).wasCalled();
+      it("does nothing and does not cause an error", function() {
+        expect(Jelly.Pages.all["UndefinedComponent"]).toEqual(undefined);
+        Jelly.Page.init("UndefinedComponent", "easterBunny");
       });
     });
   });
