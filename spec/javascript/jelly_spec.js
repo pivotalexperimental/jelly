@@ -307,8 +307,9 @@ describe("Jelly", function() {
 
         Jelly.notifyObservers({
           "arguments":["arg1", "arg2"],
-          "method":"on_my_method"
-        }, [customObserver1, customObserver2]);
+          "method":"on_my_method",
+          "observers":[customObserver1, customObserver2]
+        });
 
         expect(page.on_my_method).wasNotCalled();
         expect(component.on_my_method).wasNotCalled();
@@ -347,18 +348,26 @@ describe("Jelly", function() {
 
       describe("when the observer a detach method defined", function() {
         describe("when the detach method is truthy", function() {
+          var anotherObserver;
           beforeEach(function() {
             observer.detach = function() {
               return true;
-            }
+            };
+            anotherObserver = {
+              on_my_method: function() {
+              }
+            };
+            Jelly.attach({component: anotherObserver, arguments: []});
           });
 
-          it("removes observer in Jelly.observers and does not call the callback method on the observer", function() {
+          it("removes observer in Jelly.observers, does not call the callback method on the observer, and calls the other observers", function() {
             spyOn(observer, "on_my_method");
+            spyOn(anotherObserver, "on_my_method");
 
             Jelly.notifyObservers({method: "on_my_method", arguments: []});
             expect(Jelly.observers).toNotContain(observer);
             expect(observer.on_my_method).wasNotCalled();
+            expect(anotherObserver.on_my_method).wasCalled();
           });
         });
 

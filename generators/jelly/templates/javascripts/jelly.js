@@ -40,26 +40,14 @@ Jelly.attach = function() {
   }
 };
 
-Jelly.notifyObservers = function(params, observers) {
-  if (!observers) {
-    observers = [];
-    for (var i = 0; i < Jelly.observers.length; i++) {
-      observers.push(Jelly.observers[i]);
-    }
+Jelly.notifyObservers = function(params) {
+  var observers = params.observers || Jelly.observers.slice(0);
 
-    // Deprecate 'on' in favor of making each page action a Component.
-    if (params.on) {
-      var additionalObserver = eval(params.on);
-      var additionalObserverAlreadyAnObserver = false;
-      for (var i = 0; i < observers.length; i++) {
-        if (observers[i] == additionalObserver) {
-          additionalObserverAlreadyAnObserver = true;
-          break;
-        }
-      }
-      if (!additionalObserverAlreadyAnObserver) {
-        observers.push(additionalObserver);
-      }
+  // Deprecate 'on' in favor of making each page action a Component.
+  if (params.on) {
+    var additionalObserver = eval(params.on);
+    if (observers.indexOf(additionalObserver) == -1) {
+      observers.push(additionalObserver);
     }
   }
 
