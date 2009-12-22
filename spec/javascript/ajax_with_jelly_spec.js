@@ -78,7 +78,7 @@ describe("Jelly", function() {
       var ajaxParams = $.ajaxWithJelly.params();
       expect(ajaxParams['dataType']).toEqual('json');
       expect(ajaxParams['cache']).toBeFalsy();
-      expect(ajaxParams['success']).toEqual($.ajaxWithJelly.onSuccess);
+      expect(ajaxParams['success']).toEqual(Jelly.notifyObservers);
     });
 
     it("should preserve passed data", function() {
@@ -109,18 +109,4 @@ describe("Jelly", function() {
       expect(ajaxParams['type']).toEqual('DELETE');
     });
   });
-
-  describe("ajaxWithJelly.onSuccess", function() {
-    it("calls Jelly.notifyObservers", function() {
-      spyOn(Jelly, 'notifyObservers');
-      var params = {
-        "arguments":["arg1", "arg2"],
-        "method":"on_my_method"
-      };
-      $.ajaxWithJelly.onSuccess(params);
-      expect(Jelly.notifyObservers).wasCalled();
-      expect(Jelly.notifyObservers).wasCalledWith(params);
-    });
-  });
-
 });

@@ -22,12 +22,7 @@ if(!window.Jelly) Jelly = new Object();
     return $.extend({
       dataType: 'json',
       cache: false,
-      success : $.ajaxWithJelly.onSuccess
+      success : Jelly.notifyObservers
     }, otherParams);
-  };
-
-  $.ajaxWithJelly.onSuccess = function(json) {
-    Jelly.notifyObservers(json);
-    return true;
   };
 })(jQuery);
