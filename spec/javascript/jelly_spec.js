@@ -288,7 +288,7 @@ describe("Jelly", function() {
       });
     });
 
-    describe("when passed custom observers", function() {
+    describe("when bound to an array of custom observers", function() {
       it("notifies the given observers and not the existing Jelly.components, unless in the list of observers", function() {
         var component = {
           on_my_method: function() {
@@ -305,10 +305,9 @@ describe("Jelly", function() {
         var customObserver2 = {on_my_method: function() {}};
         spyOn(customObserver2, 'on_my_method');
 
-        Jelly.notifyObservers({
+        Jelly.notifyObservers.call([customObserver1, customObserver2],{
           "arguments":["arg1", "arg2"],
-          "method":"on_my_method",
-          "observers":[customObserver1, customObserver2]
+          "method":"on_my_method"
         });
 
         expect(page.on_my_method).wasNotCalled();

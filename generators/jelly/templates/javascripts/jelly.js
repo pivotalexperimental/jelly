@@ -16,14 +16,14 @@ if (!Function.prototype.bind) {
   Function.prototype.bind = function(object) {
     var self = this;
     return function() {
-      self.apply(object, arguments);
+      return self.apply(object, arguments);
     }
   }
 }
 Jelly.init = function() {
   this.components = [];
   this.observers = [];
-  this.notifyObservers = this.Observers.notify.bind(Jelly.observers);
+  this.notifyObservers = this.Observers.notify;
   this.Components.initCalled = false;
   this.Pages.init();
   var self = this;
@@ -67,7 +67,8 @@ Jelly.Components = {
 
 Jelly.Observers = {
   notify: function(params) {
-    var observers = params.observers || Jelly.observers.slice(0);
+    if (this == Jelly) return Jelly.Observers.notify.call(this.observers, params);
+    var observers = this.slice(0);
 
     // Deprecate 'on' in favor of making each page action a Component.
     if (params.on) {
