@@ -74,11 +74,11 @@ describe("Jelly", function() {
   });
 
   describe("ajaxWithJelly.params", function() {
-    it("should set some base prams", function() {
+    it("should set some base params", function() {
       var ajaxParams = $.ajaxWithJelly.params();
       expect(ajaxParams['dataType']).toEqual('json');
       expect(ajaxParams['cache']).toBeFalsy();
-      expect(ajaxParams['success']).toEqual(Jelly.notifyObservers);
+      expect(ajaxParams['success']).toBeTruthy();
     });
 
     it("should preserve passed data", function() {
@@ -107,6 +107,26 @@ describe("Jelly", function() {
     it("should allow override of type", function() {
       var ajaxParams = $.ajaxWithJelly.params({type : 'DELETE'});
       expect(ajaxParams['type']).toEqual('DELETE');
+    });
+
+    describe(".success", function() {
+      it("calls Jelly.notifyObservers", function() {
+        var observerArgs;
+        var observer = {
+          on_my_method: function(arg1, arg2) {
+            observerArgs = [arg1, arg2];
+          }
+        };
+        Jelly.attach({component: observer, arguments: []});
+
+        var notification = {
+          "arguments":["arg1", "arg2"],
+          "method":"on_my_method"
+        };
+        $.ajaxWithJelly.params().success(notification);
+
+        expect(observerArgs).toEqual(["arg1", "arg2"]);
+      });
     });
   });
 });

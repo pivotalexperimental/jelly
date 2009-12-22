@@ -22,7 +22,7 @@ if(!window.Jelly) Jelly = new Object();
     return $.extend({
       dataType: 'json',
       cache: false,
-      success : Jelly.notifyObservers
+      success : Jelly.notifyObservers.bind(Jelly)
     }, otherParams);
   };
 })(jQuery);
