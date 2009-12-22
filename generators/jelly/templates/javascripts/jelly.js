@@ -12,9 +12,18 @@
  */
 
 if (!window.Jelly) Jelly = new Object();
+if (!Function.prototype.bind) {
+  Function.prototype.bind = function(object) {
+    var self = this;
+    return function() {
+      self.apply(object, arguments);
+    }
+  }
+}
 Jelly.init = function() {
   this.components = [];
   this.observers = [];
+  this.notifyObservers = this.Observers.notify.bind(Jelly.observers);
   this.Components.initCalled = false;
   this.Pages.init();
   var self = this;
@@ -40,42 +49,6 @@ Jelly.attach = function() {
   }
 };
 
-Jelly.notifyObservers = function(params) {
-  var observers = params.observers || Jelly.observers.slice(0);
-
-  // Deprecate 'on' in favor of making each page action a Component.
-  if (params.on) {
-    var additionalObserver = eval(params.on);
-    if (observers.indexOf(additionalObserver) == -1) {
-      observers.push(additionalObserver);
-    }
-  }
-
-  for (var i = 0; i < observers.length; i++) {
-    var observer = observers[i];
-    if (observer[params.method]) {
-      if (observer.detach && observer.detach()) {
-        this.garbageCollectObserver(observer);
-      } else {
-        observer[params.method].apply(observer, params.arguments);
-      }
-    }
-  }
-};
-
-Jelly.garbageCollectObserver = function(observer) {
-  var index = Jelly.observers.indexOf(observer);
-  if (index > -1) {
-    this.arrayRemove(Jelly.observers, index, index + 1);
-  }
-};
-
-Jelly.arrayRemove = function(array, from, to) {
-  var rest = array.slice((to || from) + 1 || array.length);
-  array.length = from < 0 ? array.length + from : from;
-  return array.push.apply(array, rest);
-};
-
 Jelly.Components = {
   init: function() {
     for (var i = 0; i < Jelly.components.length; i++) {
@@ -89,6 +62,44 @@ Jelly.Components = {
       observer = definition.component.init.apply(definition.component, definition.arguments);
     }
     Jelly.observers.push(observer ? observer : definition.component);
+  }
+};
+
+Jelly.Observers = {
+  notify: function(params) {
+    var observers = params.observers || Jelly.observers.slice(0);
+
+    // Deprecate 'on' in favor of making each page action a Component.
+    if (params.on) {
+      var additionalObserver = eval(params.on);
+      if (observers.indexOf(additionalObserver) == -1) {
+        observers.push(additionalObserver);
+      }
+    }
+
+    for (var i = 0; i < observers.length; i++) {
+      var observer = observers[i];
+      if (observer[params.method]) {
+        if (observer.detach && observer.detach()) {
+          Jelly.Observers.garbageCollectObserver.call(this, observer);
+        } else {
+          observer[params.method].apply(observer, params.arguments);
+        }
+      }
+    }
+  },
+
+  garbageCollectObserver: function(observer) {
+    var index = this.indexOf(observer);
+    if (index > -1) {
+      Jelly.Observers.remove.call(this, index, index + 1);
+    }
+  },
+
+  remove: function(from, to) {
+    var rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
   }
 };
 
