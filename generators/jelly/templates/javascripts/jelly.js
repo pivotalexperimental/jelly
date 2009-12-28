@@ -88,6 +88,10 @@ Jelly.Observers = {
         }
       }
     }
+
+    if (params.attach) {
+      Jelly.attach.apply(Jelly, params.attach);
+    }
   },
 
   garbageCollectObserver: function(observer) {

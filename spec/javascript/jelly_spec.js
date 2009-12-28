@@ -387,6 +387,26 @@ describe("Jelly", function() {
         });
       });
     });
+
+    describe("when the 'attach' parameter is present", function() {
+      beforeEach(function() {
+        MyComponent = {
+          init: function() {
+          }
+        };
+      });
+
+      it("attaches the given attachments", function() {
+        spyOn(MyComponent, 'init');
+        Jelly.notifyObservers({
+          "arguments":["arg1", "arg2"],
+          "method":"on_my_method",
+          "attach":[{component: "MyComponent", arguments: [1,2]}]
+        });
+        expect(MyComponent.init).wasCalledWith(1, 2);
+        expect(Jelly.observers).toContain(MyComponent);
+      });
+    });
   });
 });
 
