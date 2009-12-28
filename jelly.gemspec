@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{jelly}
-  s.version = "0.7.4"
+  s.version = "0.7.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Pivotal Labs, Inc"]
-  s.date = %q{2009-12-18}
+  s.date = %q{2009-12-28}
   s.description = %q{Jelly provides a set of tools and conventions for creating rich ajax/javascript web applications with jQuery and Ruby on Rails.}
   s.email = %q{opensource@pivotallabs.com}
   s.extra_rdoc_files = [
