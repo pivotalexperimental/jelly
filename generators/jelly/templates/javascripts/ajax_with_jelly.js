@@ -23,9 +23,7 @@ if(!window.Jelly) Jelly = new Object();
     return $.extend({
       dataType: 'json',
       cache: false,
-      success : function(callbacks) {
-        Jelly.notifyObservers.call(observers, callbacks);
-      }
+      success : Jelly.notifyObservers.bind(observers)
     }, otherParams);
   };
 })(jQuery);
