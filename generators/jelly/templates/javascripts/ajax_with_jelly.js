@@ -24,7 +24,7 @@ if(!window.Jelly) Jelly = new Object();
       dataType: 'json',
       cache: false,
       success : function(callbacks) {
-        Jelly.notifyObservers.call(observers, callbacks);
+        Jelly.Observers.notify.call(observers, callbacks);
       }
     }, otherParams);
   };
