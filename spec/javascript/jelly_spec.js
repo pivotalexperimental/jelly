@@ -407,6 +407,27 @@ describe("Jelly", function() {
         expect(Jelly.observers).toContain(MyComponent);
       });
     });
+
+    describe("when given an array of callbacks", function() {
+      it("notifies the observers of all of the callback hashes", function() {
+        page.on_my_method2 = function() { };
+        spyOn(page, 'on_my_method');
+        spyOn(page, 'on_my_method2');
+        Jelly.notifyObservers([
+          {
+            "arguments":["arg1", "arg2"],
+            "method":"on_my_method"
+          },
+          {
+            "arguments": ["arg3"],
+            "method":"on_my_method2"
+          }
+        ]);
+
+        expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
+        expect(page.on_my_method2).wasCalledWith('arg3');
+      });
+    });
   });
 });
 
