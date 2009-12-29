@@ -3,25 +3,78 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper.rb')
 describe ApplicationController do
 
   describe "#jelly_callback" do
+    attr_reader :response
     before do
-      @controller.stub!(:render)
+      @response = Struct.new(:body).new
+      stub(@controller).render do |params|
+        response.body = ERB.new(params[:inline]).result(@controller.send(:binding))
+      end
     end
 
     it "have the method included" do
       @controller.respond_to?(:jelly_callback).should be_true
     end
 
-    it "should render inline the return of jelly_callback_erb" do
-      block = lambda{'foo yo'}
-      mock_erb = "whatever"
-      @controller.should_receive(:jelly_callback_erb).with("on_foo", {}, block).and_return(mock_erb)
-      @controller.should_receive(:render).with(:inline => mock_erb)
-      @controller.send(:jelly_callback, "foo", &block)
+    context "when the request is XHR" do
+      before do
+        stub(request).xhr? {true}
+      end
+
+      it "responds with a json hash" do
+        @controller.send(:jelly_callback, 'foo', {'bar' => 'baz'}) do
+          "grape"
+        end
+        callback = JSON.parse(response.body)
+        callback["method"].should == "on_foo"
+        callback["arguments"].should == ["grape"]
+        callback["bar"].should == "baz"
+      end
+
+    end
+
+    context "when the request is not XHR" do
+      before do
+        stub(request).xhr? {false}
+      end
+
+      context "when there is a callback param" do
+        before do
+          @controller.params[:callback] = "Jelly.notifyObservers"
+        end
+
+        it "responds with a call to the given callback method with the json as an argument" do
+          @controller.send(:jelly_callback, 'foo', {'bar' => 'baz'}) do
+            "grape"
+          end
+          json = Regexp.new('Jelly\.notifyObservers\((.*)\);').match(response.body)[1]
+          callback = JSON.parse(json)
+          callback["method"].should == "on_foo"
+          callback["arguments"].should == ["grape"]
+          callback["bar"].should == "baz"
+        end
+      end
+
+      context "when there is not a callback param" do
+        it "wraps the json response in a textarea tag to support File Uploads in an iframe target (see: http://malsup.com/jquery/form/#code-samples)" do
+          @controller.send(:jelly_callback, 'foo', {'bar' => 'baz'}) do
+            "grape"
+          end
+          body = response.body
+          body.should =~ /^<textarea>/
+          body.should =~ /<\/textarea>$/
+          doc = Nokogiri::HTML(body)
+
+          callback = JSON.parse(doc.at("textarea").inner_html)
+          callback["method"].should == "on_foo"
+          callback["arguments"].should == ["grape"]
+          callback["bar"].should == "baz"
+        end
+      end
     end
 
     describe "#jelly_callback_erb" do
       before do
-        request.stub!(:xhr?).and_return(true)
+        stub(request).xhr? {true}
       end
 
       context "with options" do
@@ -30,7 +83,8 @@ describe ApplicationController do
           JSON.parse(ERB.new(erb).result(@controller.send(:binding))).should == {
             'method' => 'foo',
             'arguments' => ['grape'],
-            'bar' => 'baz'
+            'bar' => 'baz',
+            'format' => 'json'
           }
         end
 
@@ -39,7 +93,8 @@ describe ApplicationController do
           JSON.parse(ERB.new(erb).result(@controller.send(:binding))).should == {
             'method' => 'foo',
             'arguments' => [],
-            'bar' => 'baz'
+            'bar' => 'baz',
+            'format' => 'json'
           }
         end
 
@@ -48,7 +103,8 @@ describe ApplicationController do
           JSON.parse(ERB.new(erb).result(@controller.send(:binding))).should == {
             'method' => 'foo',
             'arguments' => [],
-            'bar' => 'baz'
+            'bar' => 'baz',
+            'format' => 'json'
           }
         end
       end
@@ -58,7 +114,8 @@ describe ApplicationController do
           erb = @controller.send(:jelly_callback_erb, 'foo', {}, lambda{'grape'})
           JSON.parse(ERB.new(erb).result(@controller.send(:binding))).should == {
             'method' => 'foo',
-            'arguments' => ['grape']
+            'arguments' => ['grape'],
+            'format' => 'json'
           }
         end
 
@@ -66,7 +123,8 @@ describe ApplicationController do
           erb = @controller.send(:jelly_callback_erb, 'foo', {}, lambda{['grape','tangerine']})
           JSON.parse(ERB.new(erb).result(@controller.send(:binding))).should == {
             'method' => 'foo',
-            'arguments' => ['grape','tangerine']
+            'arguments' => ['grape','tangerine'],
+            'format' => 'json'
           }
         end
 
@@ -74,7 +132,8 @@ describe ApplicationController do
           erb = @controller.send(:jelly_callback_erb, 'foo', {}, nil)
           JSON.parse(ERB.new(erb).result(@controller.send(:binding))).should == {
             'method' => 'foo',
-            'arguments' => []
+            'arguments' => [],
+            'format' => 'json'
           }
         end
       end
@@ -84,35 +143,10 @@ describe ApplicationController do
         erb = @controller.send(:jelly_callback_erb, 'foo', {}, block)
         JSON.parse(ERB.new(erb).result(@controller.send(:binding))).should == {
           'method' => 'foo',
-          'arguments' => ['<div class="foo"></div>']
+          'arguments' => ['<div class="foo"></div>'],
+          'format' => 'json'
         }
       end
-
-      context "when the request is not an XHR" do
-        before do
-          request.stub!(:xhr?).and_return(false)
-        end
-
-        it "should wrap json response in a textarea tag to support File Uploads in an iframe target (see: http://malsup.com/jquery/form/#code-samples)" do
-          erb = @controller.send(:jelly_callback_erb, 'foo', {'bar' => 'baz'}, lambda{'grape'})
-          result = ERB.new(erb).result(@controller.send(:binding))
-          result.should =~ /^<textarea>/
-          result.should =~ /<\/textarea>$/
-        end
-      end
-
-      context "when the request is an XHR" do
-        before do
-          request.stub!(:xhr?).and_return(true)
-        end
-
-        it "should not do the textarea nonsense" do
-          erb = @controller.send(:jelly_callback_erb, 'foo', {'bar' => 'baz'}, lambda{'grape'})
-          ERB.new(erb).result(@controller.send(:binding)).should_not =~ /textarea/
-        end
-
-      end
-
     end
   end
 end

@@ -6,6 +6,7 @@ require File.expand_path(File.join(ENV['RAILS_ROOT'], 'config/environment.rb'))
 require 'rubygems'
 gem "test-unit"
 require 'test/unit'
+require 'rr'
 
 class Test::Unit::TestCase
   class << self
@@ -27,6 +28,7 @@ $LOAD_PATH.unshift(File.expand_path("#{File.dirname(__FILE__)}/../lib"))
 require "jelly"
 
 Spec::Runner.configure do |configuration|
+  configuration.mock_with :rr
 end
 
 class Spec::ExampleGroup

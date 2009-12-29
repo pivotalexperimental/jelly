@@ -8,9 +8,12 @@ describe JellyHelper do
 
   describe "#spread_jelly" do
     before do
-      stub_controller = mock(Object, :controller_path => 'my_fun_controller', :action_name => 'super_good_action')
-      helper.should_receive(:controller).any_number_of_times.and_return(stub_controller)
-      helper.should_receive(:form_authenticity_token).and_return('areallysecuretoken')
+      stub_controller = mock! do |controller|
+        controller.controller_path {'my_fun_controller'}
+        controller.action_name {'super_good_action'}
+      end
+      stub(helper).controller {stub_controller}
+      mock(helper).form_authenticity_token {'areallysecuretoken'}
     end
 
     it "should create a javascript include tag that attaches the Jelly.Location and Jelly.Page components" do
