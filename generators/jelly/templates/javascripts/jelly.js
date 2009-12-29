@@ -21,8 +21,9 @@ if (!Function.prototype.bind) {
   }
 }
 Jelly.init = function() {
-  this.components = [];
   this.observers = [];
+  this.observers.pending = [];
+  this.attach = this.Observers.attach;
   this.notifyObservers = this.Observers.notify;
   this.Components.initCalled = false;
   this.Pages.init();
@@ -32,43 +33,48 @@ Jelly.init = function() {
   });
 };
 
-Jelly.attach = function() {
-  for (var i = 0; i < arguments.length; i++) {
-    var definition = arguments[i];
-    var component = (typeof definition.component == "string") ?
-                    eval(definition.component) :
-                    definition.component;
-    var evaluatedDefinition = {
-      component: component,
-      arguments: definition.arguments
-    };
-    this.components.push(evaluatedDefinition);
-    if (Jelly.Components.initCalled) {
-      Jelly.Components.initComponentFromDefinition(evaluatedDefinition);
-    }
-  }
-};
-
 Jelly.Components = {
   init: function() {
-    for (var i = 0; i < Jelly.components.length; i++) {
-      this.initComponentFromDefinition(Jelly.components[i]);
+    for (var i = 0; i < Jelly.observers.pending.length; i++) {
+      Jelly.Observers.initPending.call(Jelly.observers, Jelly.observers.pending[i]);
     }
     this.initCalled = true;
-  },
-  initComponentFromDefinition: function(definition) {
-    var observer;
-    if (definition.component.init) {
-      observer = definition.component.init.apply(definition.component, definition.arguments);
-    }
-    Jelly.observers.push(observer ? observer : definition.component);
   }
 };
 
 Jelly.Observers = {
+  attach: function() {
+    if (this == Jelly) {
+      return Jelly.Observers.attach.apply(this.observers, arguments);
+    }
+    this.pending = this.pending || [];
+    for (var i = 0; i < arguments.length; i++) {
+      var definition = arguments[i];
+      var component = (typeof definition.component == "string") ?
+                      eval(definition.component) :
+                      definition.component;
+      var evaluatedDefinition = {
+        component: component,
+        arguments: definition.arguments
+      };
+      this.pending.push(evaluatedDefinition);
+      if (Jelly.Components.initCalled) {
+        Jelly.Observers.initPending.call(this, evaluatedDefinition);
+      }
+    }
+  },
+
+  initPending: function(definition) {
+    var observer;
+    if (definition.component.init) {
+      observer = definition.component.init.apply(definition.component, definition.arguments);
+    }
+    this.push(observer ? observer : definition.component);
+  },
+
   notify: function(callbacks) {
     if (this == Jelly) {
-      return Jelly.Observers.notify.call(this.observers, callbacks);
+      return Jelly.Observers.notify.apply(this.observers, arguments);
     }
     if (!$.isArray(callbacks)) {
       callbacks = [callbacks];
@@ -98,7 +104,7 @@ Jelly.Observers = {
       }
 
       if (callback.attach) {
-        Jelly.attach.apply(Jelly, callback.attach);
+        Jelly.Observers.attach.apply(this, callback.attach);
       }
     }
   },

@@ -52,7 +52,7 @@ describe("Jelly", function() {
   });
 
   describe(".attach", function() {
-    it("adds the given component (evaluating strings) and argument definitions to Jelly.components", function() {
+    it("adds the given component (evaluating strings) and argument definitions to Jelly.observers.pending", function() {
       var component1 = {
         init: function() {
         }
@@ -67,7 +67,7 @@ describe("Jelly", function() {
       {component: component2, arguments: [3, 4, 5]}
         );
 
-      expect(Jelly.components).toEqual([
+      expect(Jelly.observers.pending).toEqual([
         {component: Jelly.Page, arguments: ["MyPage", "index"]},
         {component: component1, arguments: [1, 2]},
         {component: component2, arguments: [3, 4, 5]}
@@ -80,7 +80,7 @@ describe("Jelly", function() {
         expect(Jelly.Components.initCalled).toEqual(false);
       });
 
-      it("appends the component into Jelly.components and does not call init on the given component until Jelly.Components.init is called", function() {
+      it("appends the component into Jelly.observers.pending and does not call init on the given component until Jelly.Components.init is called", function() {
         var component = {
           init: function() {
           }
@@ -91,7 +91,7 @@ describe("Jelly", function() {
           {component: "Jelly.Page", arguments: ["MyPage", "index"]},
           {component: component, arguments: [1, 2]}
         );
-        expect(Jelly.components).toContain({component: component, arguments: [1, 2]});
+        expect(Jelly.observers.pending).toContain({component: component, arguments: [1, 2]});
         expect(component.init).wasNotCalled();
 
         Jelly.Components.init();
@@ -142,14 +142,14 @@ describe("Jelly", function() {
         expect(Jelly.Components.initCalled).toEqual(true);
       });
 
-      it("appends the component into Jelly.components and calls init on the given component", function() {
+      it("appends the component into Jelly.observers.pending and calls init on the given component", function() {
         var component = {
           init: function() {
           }
         };
         spyOn(component, "init");
         Jelly.attach({component: component, arguments: [1, 2]});
-        expect(Jelly.components).toContain({component: component, arguments: [1, 2]});
+        expect(Jelly.observers.pending).toContain({component: component, arguments: [1, 2]});
         expect(component.init).wasCalledWith(1, 2);
       });
 
@@ -189,107 +189,109 @@ describe("Jelly", function() {
       Jelly.attach({component: "Jelly.Page", arguments: ["MyPage", "index"]});
     });
 
-    describe("the active page object", function() {
-      describe("when the callback method is defined on the page", function() {
-        it("should call the callback method on the page", function() {
-          spyOn(page, 'on_my_method');
-          Jelly.notifyObservers({
-            "arguments":["arg1", "arg2"],
-            "method":"on_my_method"
-          });
-          expect(page.on_my_method).wasCalled();
-          expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
-        });
-
-        describe("when there are attached components", function() {
-          it("calls the callback methods in the order of the attached components", function() {
-            var component = {
-              on_my_method: function() {
-              }
-            };
-            Jelly.attach({component: component, arguments: []});
-
-            var functionsCalledInOrder = [];
-            spyOn(page, 'on_my_method').andCallFake(function() {
-              functionsCalledInOrder.push("page");
-            });
-            spyOn(component, 'on_my_method').andCallFake(function() {
-              functionsCalledInOrder.push("component");
-            });
+    describe("when bound to the default Jelly.observers collection", function() {
+      describe("the active page object", function() {
+        describe("when the callback method is defined on the page", function() {
+          it("should call the callback method on the page", function() {
+            spyOn(page, 'on_my_method');
             Jelly.notifyObservers({
               "arguments":["arg1", "arg2"],
               "method":"on_my_method"
             });
             expect(page.on_my_method).wasCalled();
             expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
-            expect(component.on_my_method).wasCalled();
-            expect(component.on_my_method).wasCalledWith('arg1', 'arg2');
-            expect(functionsCalledInOrder).toEqual(["page", "component"]);
+          });
+
+          describe("when there are attached components", function() {
+            it("calls the callback methods in the order of the attached components", function() {
+              var component = {
+                on_my_method: function() {
+                }
+              };
+              Jelly.attach({component: component, arguments: []});
+
+              var functionsCalledInOrder = [];
+              spyOn(page, 'on_my_method').andCallFake(function() {
+                functionsCalledInOrder.push("page");
+              });
+              spyOn(component, 'on_my_method').andCallFake(function() {
+                functionsCalledInOrder.push("component");
+              });
+              Jelly.notifyObservers({
+                "arguments":["arg1", "arg2"],
+                "method":"on_my_method"
+              });
+              expect(page.on_my_method).wasCalled();
+              expect(page.on_my_method).wasCalledWith('arg1', 'arg2');
+              expect(component.on_my_method).wasCalled();
+              expect(component.on_my_method).wasCalledWith('arg1', 'arg2');
+              expect(functionsCalledInOrder).toEqual(["page", "component"]);
+            });
+          });
+        });
+
+        describe("when the page object does not define the callback method", function() {
+          it("does not blow up", function() {
+            expect(page.on_my_undefined_method).toBe(undefined);
+            Jelly.notifyObservers({
+              "arguments":["arg1", "arg2"],
+              "method":"on_my_undefined_method"
+            });
           });
         });
       });
 
-      describe("when the page object does not define the callback method", function() {
-        it("does not blow up", function() {
-          expect(page.on_my_undefined_method).toBe(undefined);
-          Jelly.notifyObservers({
-            "arguments":["arg1", "arg2"],
-            "method":"on_my_undefined_method"
-          });
-        });
-      });
-    });
-
-    describe("when the 'on' parameter is present", function() {
-      beforeEach(function() {
-        callbackObject = {};
-        callbackObject.secondObject = {on_my_method: function() {
-        }};
-      });
-
-      afterEach(function() {
-        delete callbackObject;
-      });
-
-      describe("when the 'on' object defines the callback method", function() {
-        it("should call on_my_method on that object", function() {
-          spyOn(callbackObject.secondObject, 'on_my_method');
-          Jelly.notifyObservers({
-            "arguments":["arg1", "arg2"],
-            "method":"on_my_method",
-            "on":"callbackObject.secondObject"
-          });
-          expect(callbackObject.secondObject.on_my_method).wasCalledWith('arg1', 'arg2');
+      describe("when the 'on' parameter is present", function() {
+        beforeEach(function() {
+          callbackObject = {};
+          callbackObject.secondObject = {on_my_method: function() {
+          }};
         });
 
-        describe("when that object is also a component", function () {
-          it("should only call the callback once", function() {
-            Jelly.attach({component: callbackObject.secondObject, arguments: []});
+        afterEach(function() {
+          delete callbackObject;
+        });
+
+        describe("when the 'on' object defines the callback method", function() {
+          it("should call on_my_method on that object", function() {
             spyOn(callbackObject.secondObject, 'on_my_method');
             Jelly.notifyObservers({
               "arguments":["arg1", "arg2"],
               "method":"on_my_method",
               "on":"callbackObject.secondObject"
             });
-            expect(callbackObject.secondObject.on_my_method.callCount).toEqual(1);
+            expect(callbackObject.secondObject.on_my_method).wasCalledWith('arg1', 'arg2');
+          });
+
+          describe("when that object is also a component", function () {
+            it("should only call the callback once", function() {
+              Jelly.attach({component: callbackObject.secondObject, arguments: []});
+              spyOn(callbackObject.secondObject, 'on_my_method');
+              Jelly.notifyObservers({
+                "arguments":["arg1", "arg2"],
+                "method":"on_my_method",
+                "on":"callbackObject.secondObject"
+              });
+              expect(callbackObject.secondObject.on_my_method.callCount).toEqual(1);
+            });
           });
         });
-      });
 
-      describe("when the 'on' object does not define the callback method", function() {
-        it("does not blow up", function() {
-          expect(callbackObject.secondObject.on_my_undefined_method).toBe(undefined);
-          Jelly.notifyObservers({
-            "arguments":["arg1", "arg2"],
-            "method":"on_my_undefined_method",
-            "on":"callbackObject.secondObject"
+        describe("when the 'on' object does not define the callback method", function() {
+          it("does not blow up", function() {
+            expect(callbackObject.secondObject.on_my_undefined_method).toBe(undefined);
+            Jelly.notifyObservers({
+              "arguments":["arg1", "arg2"],
+              "method":"on_my_undefined_method",
+              "on":"callbackObject.secondObject"
+            });
           });
         });
       });
     });
 
     describe("when bound to an array of custom observers", function() {
-      it("notifies the given observers and not the existing Jelly.components, unless in the list of observers", function() {
+      it("notifies the given observers and not the existing Jelly.observers, unless in the list of observers", function() {
         var component = {
           on_my_method: function() {
           }
@@ -396,15 +398,17 @@ describe("Jelly", function() {
         };
       });
 
-      it("attaches the given attachments", function() {
+      it("attaches the given attachments to the observers and calls the callback on the recently attached observer", function() {
         spyOn(MyComponent, 'init');
-        Jelly.notifyObservers({
+        var observers = [];
+        Jelly.notifyObservers.call(observers, {
           "arguments":["arg1", "arg2"],
           "method":"on_my_method",
           "attach":[{component: "MyComponent", arguments: [1,2]}]
         });
         expect(MyComponent.init).wasCalledWith(1, 2);
-        expect(Jelly.observers).toContain(MyComponent);
+        expect(Jelly.observers).toNotContain(MyComponent);
+        expect(observers).toContain(MyComponent);
       });
     });
 
