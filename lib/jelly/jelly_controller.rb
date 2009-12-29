@@ -3,6 +3,14 @@ module JellyController
   include Jelly::Common
 
   def jelly_callback(callback_base_name = @action_name, options = {}, &block)
+    raw_jelly_callback(options) do
+      arguments = block.try(:call) || []
+      jelly_callback_hash("on_#{callback_base_name}", *arguments).merge(options)
+    end
+  end
+
+  def raw_jelly_callback(options={}, &block)
+    options.symbolize_keys!
     options[:format] ||= if request.xhr?
       :json
     elsif params[:callback]
@@ -10,14 +18,12 @@ module JellyController
     else
       :iframe
     end
-    render :inline => jelly_callback_erb("on_#{callback_base_name}", options, block)
+    render :inline => jelly_callback_erb(options, &block)
   end
 
-  def jelly_callback_erb(callback_name, options, block)
+  def jelly_callback_erb(options={}, &block)
     options[:format] ||= :json
-    @callback_name = callback_name
-    @options = options
-    @block = block
+    @jelly_block = block
     case options[:format].to_sym
       when :iframe
         "<textarea>#{jelly_callback_erb_template}</textarea>"
@@ -32,9 +38,7 @@ module JellyController
   def jelly_callback_erb_template
     <<-ERB
       <%= begin
-        args = @block ? instance_eval(&@block) : []
-        args = [args] unless args.is_a?(Array)
-        json = {"method" => @callback_name, "arguments" => args}.reverse_merge(@options).to_json
+        json = instance_eval(&@jelly_block).to_json
         @jsonp_callback ? "\#{@jsonp_callback}(\#{json});" : json
       end %>
     ERB

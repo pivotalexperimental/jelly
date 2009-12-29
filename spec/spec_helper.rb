@@ -2,6 +2,7 @@
 # from the project root directory.
 ENV["RAILS_ENV"] ||= 'test'
 ENV['RAILS_ROOT'] ||= File.dirname(__FILE__) + '/rails_root'
+ARGV.push("-b")
 require File.expand_path(File.join(ENV['RAILS_ROOT'], 'config/environment.rb'))
 require 'rubygems'
 gem "test-unit"
