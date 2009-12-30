@@ -15,6 +15,54 @@ describe ApplicationController do
       @controller.respond_to?(:jelly_callback).should be_true
     end
 
+    describe "Arguments block" do
+      context "when an Array is returned from the block" do
+        it "sets the arguments to be an Array around the Hash" do
+          @controller.send(:jelly_callback, 'foo', :format => :json) do
+            ["foo", "bar"]
+          end
+          callback = JSON.parse(response.body)
+          callback["method"].should == "on_foo"
+          callback["arguments"].should == ["foo", "bar"]
+        end
+      end
+
+      context "when a non-array is returned in the block" do
+        context "when the argument is a Hash" do
+          it "sets the arguments to be an Array around the Hash" do
+            @controller.send(:jelly_callback, 'foo', :format => :json) do
+              {"foo" => "bar"}
+            end
+            callback = JSON.parse(response.body)
+            callback["method"].should == "on_foo"
+            callback["arguments"].should == [{"foo" => "bar"}]
+          end
+        end
+
+        context "when the argument is a String" do
+          it "sets the arguments to be an Array around the argument" do
+            @controller.send(:jelly_callback, 'foo', :format => :json) do
+              "foobar"
+            end
+            callback = JSON.parse(response.body)
+            callback["method"].should == "on_foo"
+            callback["arguments"].should == ["foobar"]
+          end
+        end
+
+        context "when the argument is a Number" do
+          it "sets the arguments to be an Array around the argument" do
+            @controller.send(:jelly_callback, 'foo', :format => :json) do
+              12345
+            end
+            callback = JSON.parse(response.body)
+            callback["method"].should == "on_foo"
+            callback["arguments"].should == [12345]
+          end
+        end
+      end
+    end
+
     context "when given a format" do
       describe "json" do
         it "responds with a json hash, even if the request is not xhr" do
