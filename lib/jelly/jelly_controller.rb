@@ -29,19 +29,13 @@ module JellyController
       when :iframe
         "<textarea>#{jelly_callback_erb_template}</textarea>"
       when :jsonp
-        @jsonp_callback = params[:callback]
-        jelly_callback_erb_template
+        "#{params[:callback]}(#{jelly_callback_erb_template});"
       else
         jelly_callback_erb_template
     end
   end
 
   def jelly_callback_erb_template
-    <<-ERB
-      <%= begin
-        json = instance_eval(&@jelly_block).to_json
-        @jsonp_callback ? "\#{@jsonp_callback}(\#{json});" : json
-      end %>
-    ERB
+    "<%= instance_eval(&@jelly_block).to_json %>"
   end
 end
