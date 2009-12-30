@@ -3,11 +3,12 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper.rb')
 describe ApplicationController do
 
   describe "#jelly_callback" do
-    attr_reader :response
+    attr_reader :template
     before do
-      @response = Struct.new(:body).new
       stub(@controller).render do |params|
-        response.body = ERB.new(params[:inline]).result(@controller.send(:binding))
+        @template = ActionView::Base.new(@controller.class.view_paths, {}, @controller)
+        template.send(:_evaluate_assigns_and_ivars)
+        response.body = ERB.new(params[:inline]).result(template.send(:binding))
       end
     end
 
@@ -16,6 +17,17 @@ describe ApplicationController do
     end
 
     describe "Arguments block" do
+      describe "self" do
+        it "runs with the binding of the ERB template" do
+          self_in_block = nil
+          @controller.send(:jelly_callback, 'foo', :format => :json) do
+            self_in_block = self
+            12345
+          end
+          self_in_block.should == template
+        end
+      end
+
       context "when an Array is returned from the block" do
         it "sets the arguments to be an Array around the Hash" do
           @controller.send(:jelly_callback, 'foo', :format => :json) do
