@@ -92,13 +92,15 @@ Jelly.Observers = {
         }
       }
 
-      for (var j = 0; j < observers.length; j++) {
-        var observer = observers[j];
-        if (observer[callback.method]) {
-          if (observer.detach && observer.detach()) {
-            Jelly.Observers.garbageCollectObserver.call(this, observer);
-          } else {
-            observer[callback.method].apply(observer, callback.arguments);
+      if (callback.method) {
+        for (var j = 0; j < observers.length; j++) {
+          var observer = observers[j];
+          if (observer[callback.method]) {
+            if (observer.detach && observer.detach()) {
+              Jelly.Observers.garbageCollectObserver.call(this, observer);
+            } else {
+              observer[callback.method].apply(observer, callback.arguments);
+            }
           }
         }
       }
@@ -158,9 +160,6 @@ Jelly.Page = {
 };
 
 Jelly.Location = {
-  init: function() {
-  },
-
   on_redirect: function(location) {
     top.location.href = location;
   }

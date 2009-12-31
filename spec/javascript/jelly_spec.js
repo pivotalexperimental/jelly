@@ -391,24 +391,37 @@ describe("Jelly", function() {
     });
 
     describe("when the 'attach' parameter is present", function() {
+      var observers;
       beforeEach(function() {
         MyComponent = {
           init: function() {
           }
         };
+        spyOn(MyComponent, 'init');
+        observers = [];
       });
 
-      it("attaches the given attachments to the observers and calls the callback on the recently attached observer", function() {
-        spyOn(MyComponent, 'init');
-        var observers = [];
-        Jelly.notifyObservers.call(observers, {
-          "arguments":["arg1", "arg2"],
-          "method":"on_my_method",
-          "attach":[{component: "MyComponent", arguments: [1,2]}]
+      describe("when the method is present", function() {
+        it("attaches the given attachments to the observers and calls the callback on the recently attached observer", function() {
+          Jelly.notifyObservers.call(observers, {
+            "arguments":["arg1", "arg2"],
+            "method":"on_my_method",
+            "attach":[{component: "MyComponent", arguments: [1,2]}]
+          });
+          expect(MyComponent.init).wasCalledWith(1, 2);
+          expect(Jelly.observers).toNotContain(MyComponent);
+          expect(observers).toContain(MyComponent);
         });
-        expect(MyComponent.init).wasCalledWith(1, 2);
-        expect(Jelly.observers).toNotContain(MyComponent);
-        expect(observers).toContain(MyComponent);
+      });
+
+      describe("when there are no other paramaters present", function() {
+        it("attaches the given attachments to the observers", function() {
+          Jelly.notifyObservers.call(observers, {
+            "attach":[{component: "MyComponent", arguments: [1,2]}]
+          });
+          expect(Jelly.observers).toNotContain(MyComponent);
+          expect(observers).toContain(MyComponent);
+        });
       });
     });
 
@@ -533,18 +546,18 @@ describe("Jelly.Location", function() {
     our_token = "authenticity token";
     window._token = our_token;
     Jelly.init();
-    originalTop = top;
+    originalTop = window.top;
   });
 
   afterEach(function() {
-    top = originalTop;
+    window.top = originalTop;
   });
 
   describe(".on_redirect", function() {
     it("sets top.location.href to the given location", function() {
-      top = {location: {}};
+      window.top = {location: {}};
       Jelly.Location.on_redirect("http://mars.com");
-      expect(top.location.href).toEqual("http://mars.com");
+      expect(window.top.location.href).toEqual("http://mars.com");
     });
   });
 });
