@@ -45,7 +45,7 @@ module JellyHelper
   end
 
   def attach_javascript_component_on_ready(component_name, *args)
-    # TODO: Deprecate this method
+    warn "attach_javascript_component_on_ready is deprecated since attach_javascript_component adds components to be attached in a $(document).ready block\n#{puts caller.join("\n\t")}"
     attach_javascript_component(component_name, *args)
   end
 
