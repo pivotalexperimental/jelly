@@ -116,84 +116,36 @@ describe("Jelly", function() {
     });
 
     describe("when the argument does not contain a 'component' key", function() {
-      describe("when the component does not respond to init", function() {
-        describe("when the component is referenced as a String", function() {
-          beforeEach(function() {
-            window.MyComponent = {
-            };
-          });
-
-          afterEach(function() {
-            delete window.MyComponent;
-          });
-
-          it("attaches the component to Jelly.observers", function() {
-            Jelly.attach("MyComponent");
-            expect(Jelly.observers).toContain(MyComponent);
-          });
+      describe("when the component is referenced as a String", function() {
+        beforeEach(function() {
+          window.MyComponent = {
+            init: function() {
+            }
+          };
         });
 
-        describe("when the component is referenced as itself", function() {
-          it("attaches the component to Jelly.observers", function() {
-            var component = {};
-            Jelly.attach(component);
-            expect(Jelly.observers).toContain(component);
-          });
+        afterEach(function() {
+          delete window.MyComponent;
+        });
+
+        it("does not call init and attaches the component to Jelly.observers", function() {
+          spyOn(MyComponent, 'init');
+          Jelly.attach("MyComponent");
+          expect(MyComponent.init).wasNotCalled();
+          expect(Jelly.observers).toContain(MyComponent);
         });
       });
 
-      describe("when component responds to init", function() {
-        describe("when the component's init method does not return an object", function() {
-          describe("when the component is referenced as a String", function() {
-            beforeEach(function() {
-              window.MyComponent = {
-                init: function() {
-                }
-              };
-            });
-
-            afterEach(function() {
-              delete window.MyComponent;
-            });
-
-            it("calls the init method on the component and attaches the component to Jelly.observers", function() {
-              spyOn(MyComponent, 'init');
-              Jelly.attach(MyComponent);
-              expect(MyComponent.init).wasCalled();
-              expect(Jelly.observers).toContain(MyComponent);
-            });
-          });
-
-          describe("when the component is referenced as itself", function() {
-            var component;
-            beforeEach(function() {
-              component = {
-                init: function() {
-                }
-              };
-            });
-
-            it("calls the init method on the component and attaches the component to Jelly.observers", function() {
-              spyOn(component, 'init');
-              Jelly.attach(component);
-              expect(component.init).wasCalled();
-              expect(Jelly.observers).toContain(component);
-            });
-          });
-        });
-
-        describe("when the component's init method returns an object", function() {
-          it("attaches the returned object (instead of the component) to Jelly.observers", function() {
-            var observer = new Object();
-            var component = {
-              init: function() {
-                return observer;
-              }
-            };
-            Jelly.attach({component: component, arguments: [1, 2]});
-            expect(Jelly.observers).toContain(observer);
-            expect(Jelly.observers).toNotContain(component);
-          });
+      describe("when the component is referenced as itself", function() {
+        it("does not call init and attaches the component to Jelly.observers", function() {
+          var component = {
+            init: function() {
+            }
+          };
+          spyOn(component, 'init');
+          Jelly.attach(component);
+          expect(component.init).wasNotCalled();
+          expect(Jelly.observers).toContain(component);
         });
       });
     });

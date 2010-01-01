@@ -34,17 +34,18 @@ Jelly.Observers = {
     }
     for (var i = 0; i < arguments.length; i++) {
       var definitionOrComponent = arguments[i];
-      var component, initArguments, customObserver;
+      var observer;
       if (definitionOrComponent.component) {
-        component = Jelly.Observers.evaluateComponent(definitionOrComponent.component);
-        initArguments = definitionOrComponent.arguments;
+        var component = Jelly.Observers.evaluateComponent(definitionOrComponent.component);
+        if (component.init) {
+          observer = component.init.apply(component, definitionOrComponent.arguments) || component;
+        } else {
+          observer = component;
+        }
       } else {
-        component = Jelly.Observers.evaluateComponent(definitionOrComponent);
+        observer = Jelly.Observers.evaluateComponent(definitionOrComponent);
       }
-      if (component.init) {
-        customObserver = component.init.apply(component, initArguments);
-      }
-      this.push(customObserver ? customObserver : component);
+      this.push(observer);
     }
   },
 
