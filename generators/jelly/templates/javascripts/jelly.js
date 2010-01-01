@@ -33,18 +33,23 @@ Jelly.Observers = {
       return Jelly.Observers.attach.apply(this.observers, arguments);
     }
     for (var i = 0; i < arguments.length; i++) {
-      var definition = arguments[i];
-      var component = (typeof definition.component == "string") ?
-                      eval(definition.component) :
-                      definition.component;
-      if (component) {
-        var observer;
-        if (component.init) {
-          observer = component.init.apply(component, definition.arguments);
-        }
-        this.push(observer ? observer : component);
+      var definitionOrComponent = arguments[i];
+      var component, initArguments, customObserver;
+      if (definitionOrComponent.component) {
+        component = Jelly.Observers.evaluateComponent(definitionOrComponent.component);
+        initArguments = definitionOrComponent.arguments;
+      } else {
+        component = Jelly.Observers.evaluateComponent(definitionOrComponent);
       }
+      if (component.init) {
+        customObserver = component.init.apply(component, initArguments);
+      }
+      this.push(customObserver ? customObserver : component);
     }
+  },
+
+  evaluateComponent: function(component) {
+    return (typeof component == "string") ? eval(component) : component;
   },
 
   notify: function(callbacks) {
