@@ -37,16 +37,12 @@ Jelly.Observers = {
       var component = (typeof definition.component == "string") ?
                       eval(definition.component) :
                       definition.component;
-      var evaluatedDefinition = {
-        component: component,
-        arguments: definition.arguments
-      };
-      if (evaluatedDefinition.component) {
+      if (component) {
         var observer;
-        if (evaluatedDefinition.component.init) {
-          observer = evaluatedDefinition.component.init.apply(evaluatedDefinition.component, evaluatedDefinition.arguments);
+        if (component.init) {
+          observer = component.init.apply(component, definition.arguments);
         }
-        this.push(observer ? observer : evaluatedDefinition.component);
+        this.push(observer ? observer : component);
       }
     }
   },
