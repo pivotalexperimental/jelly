@@ -31,151 +31,33 @@ describe("Jelly", function() {
     });
   });
 
-  describe(".init", function() {
-    it("should init the Jelly components", function() {
-      var thingsCalled = [];
-
-      Jelly.Pages.add("MyController", {
-        test_action: function() {
-          thingsCalled.push('page');
-        }
-      });
-
-      spyOn(Jelly.Components, 'init').andCallFake(function() {
-        thingsCalled.push('components');
-      });
-
-      Jelly.init();
-
-      expect(thingsCalled).toEqual(['components']);
-    });
-  });
-
   describe(".attach", function() {
-    it("adds the given component (evaluating strings) and argument definitions to Jelly.observers.pending", function() {
-      var component1 = {
-        init: function() {
-        }
-      };
-      var component2 = {
-        init: function() {
-        }
-      };
-      Jelly.attach(
-      {component: "Jelly.Page", arguments: ["MyPage", "index"]},
-      {component: component1, arguments: [1, 2]},
-      {component: component2, arguments: [3, 4, 5]}
-        );
-
-      expect(Jelly.observers.pending).toEqual([
-        {component: Jelly.Page, arguments: ["MyPage", "index"]},
-        {component: component1, arguments: [1, 2]},
-        {component: component2, arguments: [3, 4, 5]}
-      ]);
+    beforeEach(function() {
+      Jelly.attach({component: "Jelly.Page", arguments: ["MyPage", "index"]});
     });
 
-    describe("when Jelly.Components.initCalled is false", function() {
-      beforeEach(function() {
-        Jelly.Components.initCalled = false;
-        expect(Jelly.Components.initCalled).toEqual(false);
-      });
-
-      it("appends the component into Jelly.observers.pending and does not call init on the given component until Jelly.Components.init is called", function() {
+    describe("when the component's init method does not return an object", function() {
+      it("attaches the component to Jelly.observers", function() {
         var component = {
           init: function() {
           }
         };
-        spyOn(component, "init");
-
-        Jelly.attach(
-          {component: "Jelly.Page", arguments: ["MyPage", "index"]},
-          {component: component, arguments: [1, 2]}
-        );
-        expect(Jelly.observers.pending).toContain({component: component, arguments: [1, 2]});
-        expect(component.init).wasNotCalled();
-
-        Jelly.Components.init();
-        expect(component.init).wasCalledWith(1, 2);
-      });
-
-      describe("Jelly.Components.init", function() {
-        describe("when the component's init method does not return an object", function() {
-          it("attaches the component to Jelly.observers", function() {
-            var component = {
-              init: function() {
-              }
-            };
-            Jelly.attach({component: component, arguments: [1, 2]});
-            expect(Jelly.observers).toNotContain(component);
-
-            Jelly.Components.init();
-
-            expect(Jelly.observers).toContain(component);
-          });
-        });
-
-        describe("when the component's init method returns an object", function() {
-          it("attaches the returned object (instead of the component) to Jelly.observers", function() {
-            var observer = new Object();
-            var component = {
-              init: function() {
-                return observer;
-              }
-            };
-            Jelly.attach({component: component, arguments: [1, 2]});
-            expect(Jelly.observers).toNotContain(observer);
-            expect(Jelly.observers).toNotContain(component);
-
-            Jelly.Components.init();
-
-            expect(Jelly.observers).toContain(observer);
-            expect(Jelly.observers).toNotContain(component);
-          });
-        });
-      });
-    });
-
-    describe("when Jelly.Components.initCalled is true", function() {
-      beforeEach(function() {
-        Jelly.attach({component: "Jelly.Page", arguments: ["MyPage", "index"]});
-        Jelly.Components.init();
-        expect(Jelly.Components.initCalled).toEqual(true);
-      });
-
-      it("appends the component into Jelly.observers.pending and calls init on the given component", function() {
-        var component = {
-          init: function() {
-          }
-        };
-        spyOn(component, "init");
         Jelly.attach({component: component, arguments: [1, 2]});
-        expect(Jelly.observers.pending).toContain({component: component, arguments: [1, 2]});
-        expect(component.init).wasCalledWith(1, 2);
+        expect(Jelly.observers).toContain(component);
       });
+    });
 
-      describe("when the component's init method does not return an object", function() {
-        it("attaches the component to Jelly.observers", function() {
-          var component = {
-            init: function() {
-            }
-          };
-          Jelly.attach({component: component, arguments: [1, 2]});
-          expect(Jelly.observers).toContain(component);
-        });
-      });
-
-      describe("when the component's init method returns an object", function() {
-        it("attaches the returned object (instead of the component) to Jelly.observers", function() {
-          var observer = new Object();
-          var component = {
-            init: function() {
-              return observer;
-            }
-          };
-          Jelly.attach({component: component, arguments: [1, 2]});
-          expect(Jelly.observers).toContain(observer);
-          expect(Jelly.observers).toNotContain(component);
-        });
+    describe("when the component's init method returns an object", function() {
+      it("attaches the returned object (instead of the component) to Jelly.observers", function() {
+        var observer = new Object();
+        var component = {
+          init: function() {
+            return observer;
+          }
+        };
+        Jelly.attach({component: component, arguments: [1, 2]});
+        expect(Jelly.observers).toContain(observer);
+        expect(Jelly.observers).toNotContain(component);
       });
     });
   });

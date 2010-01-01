@@ -17,7 +17,6 @@ module JellyHelper
     <<-HTML
       #{window_token_javascript_tag}
       #{attach_javascript_component_javascript_tag(jelly_attached_components)}
-      #{attach_javascript_component_on_document_ready_javascript_tag(jelly_attached_components_on_ready)}
     HTML
   end
 
@@ -26,11 +25,6 @@ module JellyHelper
   end
 
   def attach_javascript_component_javascript_tag(*components)
-    components = [components].flatten
-    javascript_tag("Jelly.attach.apply(Jelly, #{components.to_json});")
-  end
-
-  def attach_javascript_component_on_document_ready_javascript_tag(*components)
     components = [components].flatten
     javascript_tag <<-JS
       $(document).ready(function() {
@@ -51,18 +45,12 @@ module JellyHelper
   end
 
   def attach_javascript_component_on_ready(component_name, *args)
-    key = jelly_attach_component_definition_hash(component_name, *args)
-    unless jelly_attached_components_on_ready.include? key
-      jelly_attached_components_on_ready << key
-    end
+    # TODO: Deprecate this method
+    attach_javascript_component(component_name, *args)
   end
 
   def jelly_attached_components
     @jelly_attached_components ||= []
-  end
-
-  def jelly_attached_components_on_ready
-    @jelly_attached_components_on_ready ||= []
   end
 
 end

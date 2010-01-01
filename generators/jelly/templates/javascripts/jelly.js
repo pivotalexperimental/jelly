@@ -22,24 +22,9 @@ if (!Function.prototype.bind) {
 }
 Jelly.init = function() {
   this.observers = [];
-  this.observers.pending = [];
   this.attach = this.Observers.attach;
   this.notifyObservers = this.Observers.notify;
-  this.Components.initCalled = false;
   this.Pages.init();
-  var self = this;
-  $(document).ready(function() {
-    self.Components.init();
-  });
-};
-
-Jelly.Components = {
-  init: function() {
-    for (var i = 0; i < Jelly.observers.pending.length; i++) {
-      Jelly.Observers.initPending.call(Jelly.observers, Jelly.observers.pending[i]);
-    }
-    this.initCalled = true;
-  }
 };
 
 Jelly.Observers = {
@@ -47,7 +32,6 @@ Jelly.Observers = {
     if (this == Jelly) {
       return Jelly.Observers.attach.apply(this.observers, arguments);
     }
-    this.pending = this.pending || [];
     for (var i = 0; i < arguments.length; i++) {
       var definition = arguments[i];
       var component = (typeof definition.component == "string") ?
@@ -57,19 +41,14 @@ Jelly.Observers = {
         component: component,
         arguments: definition.arguments
       };
-      this.pending.push(evaluatedDefinition);
-      if (Jelly.Components.initCalled) {
-        Jelly.Observers.initPending.call(this, evaluatedDefinition);
+      if (evaluatedDefinition.component) {
+        var observer;
+        if (evaluatedDefinition.component.init) {
+          observer = evaluatedDefinition.component.init.apply(evaluatedDefinition.component, evaluatedDefinition.arguments);
+        }
+        this.push(observer ? observer : evaluatedDefinition.component);
       }
     }
-  },
-
-  initPending: function(definition) {
-    var observer;
-    if (definition.component.init) {
-      observer = definition.component.init.apply(definition.component, definition.arguments);
-    }
-    this.push(observer ? observer : definition.component);
   },
 
   notify: function(callbacks) {

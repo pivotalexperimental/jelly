@@ -67,7 +67,7 @@ describe JellyHelper do
       ]
     end
 
-    it "adds a call to Jelly.attach in the javascript content" do
+    it "adds a call to Jelly.attach in an $(document).ready block" do
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       expected_args = ['arg1','arg2','arg3'].to_json
       assigns[:jelly_attached_components].should == [
@@ -76,26 +76,8 @@ describe JellyHelper do
 
       html = helper.spread_jelly
       doc = Nokogiri::HTML(html)
-      pre_document_ready_tag = doc.css("script")[1]
-      pre_document_ready_tag.inner_html.should_not include("$(document).ready(function() {")
-      pre_document_ready_part = pre_document_ready_tag.inner_html.split("\n")[2]
-
-      arguments = jelly_attach_arguments(pre_document_ready_part)
-      arguments.should include({'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']})
-    end
-
-    it "adds a call to Jelly.attach in the javascript_on_ready content" do
-      helper.attach_javascript_component_on_ready("MyComponent", 'arg1', 'arg2', 'arg3')
-
-      assigns[:jelly_attached_components_on_ready].should == [
-        {'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']}
-      ]
-
-      html = helper.spread_jelly
-      doc = Nokogiri::HTML(html)
-      document_ready_tag = doc.css("script")[2]
+      document_ready_tag = doc.css("script")[1]
       document_ready_tag.inner_html.should include("$(document).ready(function() {")
-
       document_ready_part = document_ready_tag.inner_html.split("\n")[3]
       arguments = jelly_attach_arguments(document_ready_part)
       arguments.should include({'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']})
