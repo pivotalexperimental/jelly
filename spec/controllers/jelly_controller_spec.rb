@@ -123,31 +123,14 @@ describe ApplicationController do
       end
     end
 
-    context "when the request is XHR" do
+    context "when there is a callback param" do
       before do
-        stub(request).xhr? {true}
+        @controller.params[:callback] = "Jelly.notifyObservers"
       end
 
-      it "responds with a json hash" do
-        @controller.send(:jelly_callback, 'foo', {'bar' => 'baz'}) do
-          "grape"
-        end
-        callback = JSON.parse(response.body)
-        callback["method"].should == "on_foo"
-        callback["arguments"].should == ["grape"]
-        callback["bar"].should == "baz"
-      end
-
-    end
-
-    context "when the request is not XHR" do
-      before do
-        stub(request).xhr? {false}
-      end
-
-      context "when there is a callback param" do
+      context "when the request is XHR" do
         before do
-          @controller.params[:callback] = "Jelly.notifyObservers"
+          stub(request).xhr? {true}
         end
 
         it "responds with a call to the given callback method with the json as an argument" do
@@ -162,20 +145,62 @@ describe ApplicationController do
         end
       end
 
-      context "when there is not a callback param" do
-        it "wraps the json response in a textarea tag to support File Uploads in an iframe target (see: http://malsup.com/jquery/form/#code-samples)" do
+      context "when the request is not XHR" do
+        before do
+          stub(request).xhr? {false}
+        end
+
+        it "responds with a call to the given callback method with the json as an argument" do
           @controller.send(:jelly_callback, 'foo', {'bar' => 'baz'}) do
             "grape"
           end
-          body = response.body
-          body.should =~ /^<textarea>/
-          body.should =~ /<\/textarea>$/
-          doc = Nokogiri::HTML(body)
-
-          callback = JSON.parse(doc.at("textarea").inner_html)
+          json = Regexp.new('Jelly\.notifyObservers\((.*)\);').match(response.body)[1]
+          callback = JSON.parse(json)
           callback["method"].should == "on_foo"
           callback["arguments"].should == ["grape"]
           callback["bar"].should == "baz"
+        end
+      end
+    end
+
+    context "when there is not a callback param" do
+      context "when the request is XHR" do
+        before do
+          stub(request).xhr? {true}
+        end
+
+        it "responds with a json hash" do
+          @controller.send(:jelly_callback, 'foo', {'bar' => 'baz'}) do
+            "grape"
+          end
+          callback = JSON.parse(response.body)
+          callback["method"].should == "on_foo"
+          callback["arguments"].should == ["grape"]
+          callback["bar"].should == "baz"
+        end
+
+      end
+
+      context "when the request is not XHR" do
+        before do
+          stub(request).xhr? {false}
+        end
+
+        context "when there is not a callback param" do
+          it "wraps the json response in a textarea tag to support File Uploads in an iframe target (see: http://malsup.com/jquery/form/#code-samples)" do
+            @controller.send(:jelly_callback, 'foo', {'bar' => 'baz'}) do
+              "grape"
+            end
+            body = response.body
+            body.should =~ /^<textarea>/
+            body.should =~ /<\/textarea>$/
+            doc = Nokogiri::HTML(body)
+
+            callback = JSON.parse(doc.at("textarea").inner_html)
+            callback["method"].should == "on_foo"
+            callback["arguments"].should == ["grape"]
+            callback["bar"].should == "baz"
+          end
         end
       end
     end

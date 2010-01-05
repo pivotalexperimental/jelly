@@ -12,10 +12,10 @@ module JellyController
 
   def raw_jelly_callback(options={}, &block)
     options.symbolize_keys!
-    options[:format] ||= if request.xhr?
-      :json
-    elsif params[:callback]
+    options[:format] ||= if params[:callback]
       :jsonp
+    elsif request.xhr?
+      :json
     else
       :iframe
     end
