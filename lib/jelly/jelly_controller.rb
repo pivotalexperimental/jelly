@@ -4,7 +4,7 @@ module JellyController
 
   def jelly_callback(callback_base_name = @action_name, options = {}, &block)
     raw_jelly_callback(options) do
-      arguments = block ? instance_eval(&block) || [] : []
+      arguments = block ? instance_eval(&block) : []
       arguments = [arguments] unless arguments.is_a?(Array)
       jelly_callback_hash("on_#{callback_base_name}", *arguments).merge(options)
     end
