@@ -41,7 +41,7 @@ $.extend(Jelly, {
             var initReturnValue = component.init.apply(component, definitionOrComponent.arguments);
             if (initReturnValue === false || initReturnValue === null) {
             } else {
-              Jelly.Observers.pushIfObserver.call(this, component.init.apply(component, definitionOrComponent.arguments) || component);
+              Jelly.Observers.pushIfObserver.call(this, initReturnValue || component);
             }
           } else {
             Jelly.Observers.pushIfObserver.call(this, component);
