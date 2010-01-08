@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{jelly}
-  s.version = "0.8.7"
+  s.version = "0.8.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Pivotal Labs, Inc"]
-  s.date = %q{2010-01-06}
+  s.date = %q{2010-01-08}
   s.description = %q{Jelly provides a set of tools and conventions for creating rich ajax/javascript web applications with jQuery and Ruby on Rails.}
   s.email = %q{opensource@pivotallabs.com}
   s.extra_rdoc_files = [
@@ -41,9 +41,10 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.5}
   s.summary = %q{a sweet unobtrusive javascript framework for jQuery and Rails}
   s.test_files = [
-    "spec/helpers/jelly_helper_spec.rb",
+    "spec/jelly/jelly_controller_spec.rb",
+     "spec/jelly/common_spec.rb",
+     "spec/jelly/jelly_helper_spec.rb",
      "spec/spec_suite.rb",
-     "spec/controllers/jelly_controller_spec.rb",
      "spec/spec_helper.rb",
      "spec/rails_root/test/performance/browsing_test.rb",
      "spec/rails_root/test/test_helper.rb",
