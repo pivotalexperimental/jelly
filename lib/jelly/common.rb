@@ -4,7 +4,11 @@ module Jelly
       {"method" => method, "arguments" => arguments}
     end
 
-    def jelly_attach_component_definition_hash(component_name, *args)
+    def jelly_callback_attach_hash(components=jelly_attachments)
+      {"attach" => components}
+    end
+
+    def jelly_attachment_hash(component_name, *args)
       {'component' => component_name, 'arguments' => args}
     end
   end

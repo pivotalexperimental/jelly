@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper.rb')
 
-describe ApplicationController do
+describe ApplicationController, :type => :controller do
 
   describe "#jelly_callback" do
     attr_reader :template

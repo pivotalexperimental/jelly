@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper.rb')
 
-describe JellyHelper do
+describe JellyHelper, :type => :helper do
 
   def jelly_attach_arguments(html)
     JSON.parse(Regexp.new('Jelly\.attach\.apply\(Jelly, (.*)\);').match(html)[1])
@@ -61,7 +61,7 @@ describe JellyHelper do
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg5')
-      assigns[:jelly_attached_components].should == [
+      assigns[:jelly_attachments].should == [
         {'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']},
         {'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg5']},
       ]
@@ -70,7 +70,7 @@ describe JellyHelper do
     it "adds a call to Jelly.attach in an $(document).ready block" do
       helper.attach_javascript_component("MyComponent", 'arg1', 'arg2', 'arg3')
       expected_args = ['arg1','arg2','arg3'].to_json
-      assigns[:jelly_attached_components].should == [
+      assigns[:jelly_attachments].should == [
         {'component' => "MyComponent", 'arguments' => ['arg1', 'arg2', 'arg3']}
       ]
 

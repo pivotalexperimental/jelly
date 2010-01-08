@@ -16,7 +16,7 @@ module JellyHelper
     attach_javascript_component("Jelly.Page", controller.controller_path.camelcase, controller.action_name)
     <<-HTML
       #{window_token_javascript_tag}
-      #{attach_javascript_component_javascript_tag(jelly_attached_components)}
+      #{attach_javascript_component_javascript_tag(jelly_attachments)}
     HTML
   end
 
@@ -34,13 +34,13 @@ module JellyHelper
   end
 
   def clear_jelly_attached
-    jelly_attached_components.clear
+    jelly_attachments.clear
   end
 
   def attach_javascript_component(component_name, *args)
-    key = jelly_attach_component_definition_hash(component_name, *args)
-    unless jelly_attached_components.include? key
-      jelly_attached_components << key
+    key = jelly_attachment_hash(component_name, *args)
+    unless jelly_attachments.include? key
+      jelly_attachments << key
     end
   end
 
@@ -49,8 +49,8 @@ module JellyHelper
     attach_javascript_component(component_name, *args)
   end
 
-  def jelly_attached_components
-    @jelly_attached_components ||= []
+  def jelly_attachments
+    @jelly_attachments ||= []
   end
 
 end
