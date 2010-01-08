@@ -35,23 +35,31 @@ $.extend(Jelly, {
       }
       for (var i = 0; i < arguments.length; i++) {
         var definitionOrComponent = arguments[i];
-        var observer;
         if (definitionOrComponent.component) {
           var component = Jelly.Observers.evaluateComponent(definitionOrComponent.component);
           if (component.init) {
-            observer = component.init.apply(component, definitionOrComponent.arguments) || component;
+            var initReturnValue = component.init.apply(component, definitionOrComponent.arguments);
+            if (initReturnValue === false || initReturnValue === null) {
+            } else {
+              Jelly.Observers.pushIfObserver.call(this, component.init.apply(component, definitionOrComponent.arguments) || component);
+            }
           } else {
-            observer = component;
+            Jelly.Observers.pushIfObserver.call(this, component);
           }
         } else {
-          observer = Jelly.Observers.evaluateComponent(definitionOrComponent);
+          Jelly.Observers.pushIfObserver.call(this, Jelly.Observers.evaluateComponent(definitionOrComponent));
         }
-        this.push(observer);
       }
     },
 
     evaluateComponent: function(component) {
       return (typeof component == "string") ? eval(component) : component;
+    },
+
+    pushIfObserver: function(observer) {
+      if (observer) {
+        this.push(observer);
+      }
     },
 
     notify: function(callbacks) {

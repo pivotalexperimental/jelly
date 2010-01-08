@@ -60,7 +60,7 @@ describe("Jelly", function() {
       });
 
       describe("when component responds to init", function() {
-        describe("when the component's init method does not return an object", function() {
+        describe("when the component's init method returns undefined", function() {
           describe("when the component is referenced as a String", function() {
             beforeEach(function() {
               window.MyComponent = {
@@ -96,6 +96,46 @@ describe("Jelly", function() {
               expect(component.init).wasCalledWith(1, 2);
               expect(Jelly.observers).toContain(component);
             });
+          });
+        });
+
+        describe("when the component's init method returns false", function() {
+          var component;
+          beforeEach(function() {
+            component = {
+              init: function() {
+                component.initCalled = true;
+                return false;
+              }
+            };
+          });
+
+          it("calls the init method on the component and does not attaches an observer to Jelly.observers", function() {
+            var originalObserversLength = Jelly.observers.length;
+            Jelly.attach({component: component, arguments: [1, 2]});
+            expect(component.initCalled).toBeTruthy();
+            expect(Jelly.observers.length).toEqual(originalObserversLength);
+            expect(Jelly.observers).toNotContain(component);
+          });
+        });
+
+        describe("when the component's init method returns null", function() {
+          var component;
+          beforeEach(function() {
+            component = {
+              init: function() {
+                component.initCalled = true;
+                return null;
+              }
+            };
+          });
+
+          it("calls the init method on the component and does not attaches an observer to Jelly.observers", function() {
+            var originalObserversLength = Jelly.observers.length;
+            Jelly.attach({component: component, arguments: [1, 2]});
+            expect(component.initCalled).toBeTruthy();
+            expect(Jelly.observers.length).toEqual(originalObserversLength);
+            expect(Jelly.observers).toNotContain(component);
           });
         });
 
