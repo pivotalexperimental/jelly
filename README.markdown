@@ -344,3 +344,5 @@ Track Jelly's development roadmap on [Jelly's Pivotal Tracker project](http://ww
 To run ruby tests, run `rake spec`.
 
 To run Javascript tests, open `jelly/spec/jasmine_runner.html` in Firefox or Safari.
+
+Copyright (c) 2010 Pivotal Labs. This software is licensed under the MIT License.
