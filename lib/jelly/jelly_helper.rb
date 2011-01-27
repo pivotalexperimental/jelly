@@ -16,6 +16,7 @@ module JellyHelper
     attach_javascript_component("Jelly.Page", controller.controller_path.camelcase, controller.action_name)
     <<-HTML
       #{window_token_javascript_tag}
+      #{jelly_component_sources.uniq.collect {|a| javascript_src_tag "components/#{a}", {} }.join("\r\n")}
       #{attach_javascript_component_javascript_tag(jelly_attachments)}
     HTML
   end
@@ -38,6 +39,13 @@ module JellyHelper
   end
 
   def attach_javascript_component(component_name, *args)
+    # first, check whether we need to create a script tag for this component
+    src_tag = args.detect {|a| a.class == Hash and a.has_key? :create_src_tag}
+    if src_tag
+      args.delete(src_tag)
+      jelly_component_sources << component_name
+    end
+
     key = jelly_attachment_hash(component_name, *args)
     unless jelly_attachments.include? key
       jelly_attachments << key
@@ -51,6 +59,10 @@ module JellyHelper
 
   def jelly_attachments
     @jelly_attachments ||= []
+  end
+
+  def jelly_component_sources
+    @jelly_component_sources ||= []
   end
 
 end
