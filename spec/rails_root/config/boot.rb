@@ -42,7 +42,7 @@ module Rails
 
   class VendorBoot < Boot
     def load_initializer
-      require "#{RAILS_ROOT}/vendor/rails/railties/lib/initializer"
+      require Rails.root.join("vendor/rails/railties/lib/initializer")
       Rails::Initializer.run(:install_gem_spec_stubs)
       Rails::GemDependency.add_frozen_gem_path
     end
@@ -100,7 +100,7 @@ module Rails
 
       private
         def read_environment_rb
-          File.read("#{RAILS_ROOT}/config/environment.rb")
+          File.read(Rails.root.join("/config/environment.rb"))
         end
     end
   end

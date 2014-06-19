@@ -1,7 +1,7 @@
 module JellyHelper
   include Jelly::Common
 
-  def application_jelly_files(jelly_files_path_from_javascripts = '', rails_root = RAILS_ROOT)
+  def application_jelly_files(jelly_files_path_from_javascripts = '', rails_root = Rails.root)
     rails_root = File.expand_path(rails_root)
     (
       Dir[File.expand_path("#{rails_root}/public/javascripts/#{jelly_files_path_from_javascripts}/components/**/*.js")] +
